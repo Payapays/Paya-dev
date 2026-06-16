@@ -413,6 +413,7 @@ fn prediction_outcome_matches(env: &Env, predicted_outcome: &Symbol, actual_winn
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
     // Note: Unit tests for oracle functions require Soroban contract context.

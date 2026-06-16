@@ -57,6 +57,7 @@ fn get_future_time(env: &Env, offset_seconds: u64) -> u64 {
     env.ledger().timestamp() + offset_seconds
 }
 
+#[allow(dead_code)]
 fn get_past_time(env: &Env, offset_seconds: u64) -> u64 {
     let current = env.ledger().timestamp();
     if current > offset_seconds {
