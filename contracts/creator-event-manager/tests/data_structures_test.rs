@@ -20,6 +20,8 @@ fn make_event(env: &Env, event_id: u64) -> Event {
         String::from_str(env, "A test prediction event"),
         1_000_000i128,
         1_640_995_200u64,
+        1_640_995_200u64 + 3600, // start_time (created_at)
+        1_640_995_200u64 + 86400, // end_time (24 hours later)
         Symbol::new(env, "ABCD1234"),
         100u32,
     )
@@ -125,6 +127,8 @@ fn test_event_add_participant_rejects_when_full() {
         String::from_str(&env, "Only 1 spot"),
         0i128,
         0u64,
+        1000u64, // start_time
+        2000u64, // end_time
         Symbol::new(&env, "LIMIT1"),
         1u32,
     );

@@ -54,6 +54,10 @@ fn desc(env: &Env) -> String {
     String::from_str(env, "Test Description")
 }
 
+fn get_future_time(env: &Env, offset_seconds: u64) -> u64 {
+    env.ledger().timestamp() + offset_seconds
+}
+
 fn create_event_with_match(
     env: &Env,
     contract_id: &Address,
@@ -63,7 +67,9 @@ fn create_event_with_match(
     match_time_offset: u64,
 ) -> (u64, Symbol, u64) {
     fund(env, xlm_token, creator, FEE);
-    let (event_id, invite_code) = client.create_event(creator, &title(env), &desc(env), &10u32);
+    let start_time = get_future_time(env, 3600);
+    let end_time = get_future_time(env, 7200);
+    let (event_id, invite_code) = client.create_event(creator, &title(env), &desc(env), &10u32, &start_time, &end_time);
 
     let match_id = env.as_contract(contract_id, || {
         let match_id = storage::next_match_id(env);

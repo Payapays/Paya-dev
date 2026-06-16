@@ -14,6 +14,10 @@ fn desc(env: &Env) -> String {
     String::from_str(env, "Predict the matches of the 2026 World Cup.")
 }
 
+fn get_future_time(env: &Env, offset_seconds: u64) -> u64 {
+    env.ledger().timestamp() + offset_seconds
+}
+
 #[test]
 fn test_get_config_returns_correct_config() {
     let env = Env::default();
@@ -73,7 +77,10 @@ fn test_treasury_balance_and_withdraw_success() {
     let token = TokenClient::new(&env, &xlm_token);
     token.approve(&treasury, &contract_id, &FEE, &0u32);
 
-    let (_event_id, _invite_code) = client.create_event(&creator, &title(&env), &desc(&env), &2u32);
+    let start_time = get_future_time(&env, 3600);
+    let end_time = get_future_time(&env, 7200);
+
+    let (_event_id, _invite_code) = client.create_event(&creator, &title(&env), &desc(&env), &2u32, &start_time, &end_time);
 
     // Treasury address should now have the fee
     let bal = client.get_treasury_balance();
@@ -117,7 +124,10 @@ fn test_withdraw_non_admin_rejected() {
 
     let creator = Address::generate(&env);
     StellarAssetClient::new(&env, &xlm_token).mint(&creator, &FEE);
-    client.create_event(&creator, &title(&env), &desc(&env), &2u32);
+    let start_time = get_future_time(&env, 3600);
+    let end_time = get_future_time(&env, 7200);
+
+    client.create_event(&creator, &title(&env), &desc(&env), &2u32, &start_time, &end_time);
 
     let non_admin = Address::generate(&env);
     let recipient = Address::generate(&env);
