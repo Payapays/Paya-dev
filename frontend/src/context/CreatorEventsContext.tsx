@@ -25,6 +25,12 @@ export interface CreatorEvent {
   createdAt: string;
   endsAt: string;
   joined?: boolean;
+  startTime?: string;
+  prizePool?: number;
+  rewardDistribution?: RewardDistribution;
+  entryFee?: number;
+  category?: string;
+  bannerUrl?: string;
 }
 
 export interface CreatorEventMatch {
@@ -54,6 +60,27 @@ export interface Winner {
   rank: number;
 }
 
+export interface RewardDistribution {
+  rank1: number;
+  rank2: number;
+  rank3: number;
+  rank4: number;
+  rank5: number;
+}
+
+export interface CreateEventInput {
+  title: string;
+  description: string;
+  maxParticipants: number;
+  startTime: string;
+  endTime: string;
+  prizePool: number;
+  rewardDistribution: RewardDistribution;
+  entryFee: number;
+  category: string;
+  bannerUrl: string;
+}
+
 export interface CreatorEventsContextValue {
   myJoinedEvents: CreatorEvent[];
   myCreatedEvents: CreatorEvent[];
@@ -62,9 +89,7 @@ export interface CreatorEventsContextValue {
   error: string | null;
 
   createEvent: (
-    title: string,
-    description: string,
-    maxParticipants: number,
+    input: CreateEventInput,
   ) => Promise<{ eventId: string; inviteCode: string }>;
   joinEvent: (inviteCode: string) => Promise<boolean>;
   addMatch: (
@@ -331,9 +356,7 @@ export function CreatorEventsProvider({
 
   const createEvent = useCallback(
     async (
-      title: string,
-      description: string,
-      maxParticipants: number,
+      input: CreateEventInput,
     ): Promise<{ eventId: string; inviteCode: string }> => {
       setIsLoading(true);
       setError(null);
@@ -342,17 +365,23 @@ export function CreatorEventsProvider({
         const inviteCode = `ARENA-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
         const newEvent: CreatorEvent = {
           id: eventId,
-          title,
-          description,
+          title: input.title,
+          description: input.description,
           creator: address ?? "unknown",
-          maxParticipants,
+          maxParticipants: input.maxParticipants,
           participants: 0,
           status: "Active",
           inviteCode,
           matchesCount: 0,
           createdAt: new Date().toISOString().split("T")[0],
-          endsAt: "",
+          endsAt: input.endTime,
           joined: true,
+          startTime: input.startTime,
+          prizePool: input.prizePool,
+          rewardDistribution: input.rewardDistribution,
+          entryFee: input.entryFee,
+          category: input.category,
+          bannerUrl: input.bannerUrl,
         };
         setEventCache((prev) => ({ ...prev, [eventId]: newEvent }));
         return { eventId, inviteCode };

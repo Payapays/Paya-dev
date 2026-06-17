@@ -10,4 +10,6 @@ export {
   type Participant,
   type Prediction,
   type Winner,
+  type RewardDistribution,
+  type CreateEventInput,
 } from "@/context/CreatorEventsContext";
