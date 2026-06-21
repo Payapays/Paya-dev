@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   MinLength,
   validateSync,
@@ -52,6 +53,18 @@ class EnvironmentVariables {
 
   @IsNumber()
   WEBHOOK_BATCH_SIZE: number = 50;
+
+  @IsOptional()
+  @IsString()
+  RECONCILE_ENABLED?: string;
+
+  @IsOptional()
+  @IsNumber()
+  RECONCILE_INTERVAL_MS?: number;
+
+  @IsOptional()
+  @IsNumber()
+  RECONCILE_WINDOW?: number;
 }
 
 export function validate(config: Record<string, unknown>) {
