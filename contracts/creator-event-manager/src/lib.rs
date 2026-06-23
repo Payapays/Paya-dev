@@ -336,6 +336,27 @@ impl CreatorEventManagerContract {
         }
     }
 
+    /// Cancel an event. Only the event creator may call this before finalization.
+    ///
+    /// Marks the event as cancelled and inactive, and emits a
+    /// `("event", "cancelled")` contract event. Cancellation is irreversible.
+    ///
+    /// # Panics
+    /// * `"event_not_found"` — no event exists with the given ID.
+    /// * `"unauthorized"` — caller is not the event creator.
+    /// * `"already_finalized"` — the event has already been finalized.
+    /// * `"event_cancelled"` — the event is already cancelled.
+    pub fn cancel_event(env: Env, caller: Address, event_id: u64) {
+        match event::cancel_event(&env, caller, event_id) {
+            Ok(()) => {}
+            Err(EventError::EventNotFound) => panic!("event_not_found"),
+            Err(EventError::Unauthorized) => panic!("unauthorized"),
+            Err(EventError::AlreadyFinalized) => panic!("already_finalized"),
+            Err(EventError::EventCancelled) => panic!("event_cancelled"),
+            Err(_) => panic!("unexpected_error"),
+        }
+    }
+
     /// Return the escrowed prize pool (in stroops) for an event.
     ///
     /// Returns `0` for a "fun event" with no payouts.

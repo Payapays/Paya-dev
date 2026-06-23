@@ -55,6 +55,8 @@ pub enum EventError {
     EventCancelled = 19,
     /// entry_fee < 0
     InvalidEntryFee = 20,
+    /// Caller is not the event creator.
+    Unauthorized = 21,
 }
 
 impl From<InviteError> for EventError {
@@ -280,6 +282,48 @@ pub fn create_event(
     }
 
     Ok((event_id, invite_code))
+}
+
+// ---------------------------------------------------------------------------
+// cancel_event (#1019)
+// ---------------------------------------------------------------------------
+
+/// Cancel an event. Only the event creator may call this, and only before
+/// the event has been finalized.
+///
+/// Sets `is_cancelled = true` and `is_active = false` on the stored event and
+/// emits a `("event", "cancelled")` contract event.
+///
+/// Returns [`EventError::EventNotFound`] when the ID is unknown,
+/// [`EventError::Unauthorized`] when `caller` is not the creator,
+/// and [`EventError::AlreadyFinalized`] when the event is already finalized.
+/// Returns [`EventError::EventCancelled`] if the event was already cancelled.
+pub fn cancel_event(env: &Env, caller: Address, event_id: u64) -> Result<(), EventError> {
+    caller.require_auth();
+
+    let mut event = storage::get_event(env, event_id).map_err(|_| EventError::EventNotFound)?;
+
+    if event.creator != caller {
+        return Err(EventError::Unauthorized);
+    }
+
+    if event.is_finalized {
+        return Err(EventError::AlreadyFinalized);
+    }
+
+    if event.is_cancelled {
+        return Err(EventError::EventCancelled);
+    }
+
+    event.cancel();
+    storage::set_event(env, event_id, &event);
+
+    env.events().publish(
+        (Symbol::new(env, "event"), Symbol::new(env, "cancelled")),
+        event_id,
+    );
+
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
