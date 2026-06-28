@@ -585,6 +585,56 @@ fn list_markets_empty_when_start_out_of_bounds() {
 }
 
 #[test]
+fn list_markets_pagination_returns_correct_slices_with_no_gaps() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let client = deploy(&env);
+    let creator = Address::generate(&env);
+
+    for _ in 0..10 {
+        client.create_market(&creator, &default_params(&env));
+    }
+
+    let first_page = client.list_markets(&1_u64, &5_u32);
+    assert_eq!(first_page.len(), 5);
+    assert_eq!(first_page.get(0).unwrap().market_id, 1);
+    assert_eq!(first_page.get(1).unwrap().market_id, 2);
+    assert_eq!(first_page.get(2).unwrap().market_id, 3);
+    assert_eq!(first_page.get(3).unwrap().market_id, 4);
+    assert_eq!(first_page.get(4).unwrap().market_id, 5);
+
+    let second_page = client.list_markets(&6_u64, &5_u32);
+    assert_eq!(second_page.len(), 5);
+    assert_eq!(second_page.get(0).unwrap().market_id, 6);
+    assert_eq!(second_page.get(1).unwrap().market_id, 7);
+    assert_eq!(second_page.get(2).unwrap().market_id, 8);
+    assert_eq!(second_page.get(3).unwrap().market_id, 9);
+    assert_eq!(second_page.get(4).unwrap().market_id, 10);
+
+    let mut all_ids: Vec<u64> = Vec::new(&env);
+    for i in 0..5 {
+        all_ids.push_back(first_page.get(i).unwrap().market_id);
+    }
+    for i in 0..5 {
+        all_ids.push_back(second_page.get(i).unwrap().market_id);
+    }
+    let mut seen = Vec::new(&env);
+    for i in 0..10 {
+        let id = all_ids.get(i).unwrap();
+        assert!(!seen.contains(id), "duplicate market_id {}", id);
+        seen.push_back(id);
+    }
+
+    let last_partial = client.list_markets(&9_u64, &5_u32);
+    assert_eq!(last_partial.len(), 2);
+    assert_eq!(last_partial.get(0).unwrap().market_id, 9);
+    assert_eq!(last_partial.get(1).unwrap().market_id, 10);
+
+    let out_of_bounds = client.list_markets(&11_u64, &5_u32);
+    assert_eq!(out_of_bounds.len(), 0);
+}
+
+#[test]
 fn close_market_fails_before_end_time() {
     let env = Env::default();
     env.mock_all_auths();
