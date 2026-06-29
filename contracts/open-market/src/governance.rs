@@ -98,6 +98,12 @@ pub fn create_proposal(
         return Err(InsightArenaError::InvalidInput);
     }
 
+    // Check that proposer has platform history (is registered)
+    let registered_users = load_registered_users(env);
+    if !registered_users.iter().any(|user| user == proposer) {
+        return Err(InsightArenaError::Unauthorized);
+    }
+
     let next_id = env
         .storage()
         .persistent()
