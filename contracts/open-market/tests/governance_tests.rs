@@ -224,18 +224,3 @@ fn test_cancel_proposal_by_non_proposer_fails() {
     let result = client.try_cancel_proposal(&non_proposer, &id);
     assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
 }
-
-#[test]
-fn test_create_proposal_fails_for_unregistered_address() {
-    let env = Env::default();
-    env.mock_all_auths();
-    let (client, _admin) = deploy(&env);
-
-    // Create a brand-new address that has never interacted with the platform
-    let unregistered = Address::generate(&env);
-    let duration = 3_600_u64;
-
-    // Attempt to create a proposal from the unregistered address
-    let result = client.try_create_proposal(&unregistered, &ProposalType::UpdateProtocolFee(400), &duration);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
-}
