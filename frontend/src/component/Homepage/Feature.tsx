@@ -28,7 +28,7 @@ const features = [
   {
     icon: Lock,
     title: "Non-Custodial Escrow",
-    body: "InsightArena never holds your funds. Smart contracts lock stakes until resolution.",
+    body: "PayaStakes never holds your funds. Smart contracts lock stakes until resolution.",
   },
   {
     icon: Scale,

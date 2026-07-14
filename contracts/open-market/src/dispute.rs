@@ -1,7 +1,7 @@
 use soroban_sdk::{symbol_short, Address, Env, Vec};
 
 use crate::config;
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::escrow;
 use crate::market;
 use crate::reputation;
@@ -24,11 +24,11 @@ fn bump_active_dispute_list(env: &Env) {
     );
 }
 
-fn require_admin(env: &Env, admin: &Address) -> Result<(), InsightArenaError> {
+fn require_admin(env: &Env, admin: &Address) -> Result<(), PayaStakesError> {
     admin.require_auth();
     let cfg = config::get_config(env)?;
     if admin != &cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
     Ok(())
 }
@@ -47,12 +47,12 @@ fn emit_dispute_resolved(env: &Env, market_id: u64, admin: &Address, uphold: boo
     );
 }
 
-pub fn get_dispute(env: &Env, market_id: u64) -> Result<Dispute, InsightArenaError> {
+pub fn get_dispute(env: &Env, market_id: u64) -> Result<Dispute, PayaStakesError> {
     let dispute: Dispute = env
         .storage()
         .persistent()
         .get(&DataKey::Dispute(market_id))
-        .ok_or(InsightArenaError::DisputeNotFound)?;
+        .ok_or(PayaStakesError::DisputeNotFound)?;
     bump_dispute(env, market_id);
     Ok(dispute)
 }
@@ -62,31 +62,31 @@ pub fn raise_dispute(
     disputer: Address,
     market_id: u64,
     bond: i128,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     config::ensure_not_paused(&env)?;
 
     if bond <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let market = market::get_market(&env, market_id)?;
     if !market.is_resolved {
-        return Err(InsightArenaError::MarketNotResolved);
+        return Err(PayaStakesError::MarketNotResolved);
     }
 
     if env.storage().persistent().has(&DataKey::Dispute(market_id)) {
-        return Err(InsightArenaError::DisputeAlreadyFiled);
+        return Err(PayaStakesError::DisputeAlreadyFiled);
     }
 
     let now = env.ledger().timestamp();
     let resolved_at = market
         .resolved_at
-        .ok_or(InsightArenaError::MarketNotResolved)?;
+        .ok_or(PayaStakesError::MarketNotResolved)?;
     let deadline = resolved_at
         .checked_add(market.dispute_window)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     if now > deadline {
-        return Err(InsightArenaError::DisputeWindowClosed);
+        return Err(PayaStakesError::DisputeWindowClosed);
     }
 
     escrow::lock_stake(&env, &disputer, bond)?;
@@ -129,7 +129,7 @@ pub fn resolve_dispute(
     admin: Address,
     market_id: u64,
     uphold: bool,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     config::ensure_not_paused(&env)?;
     require_admin(&env, &admin)?;
 
@@ -137,7 +137,7 @@ pub fn resolve_dispute(
         .storage()
         .persistent()
         .get(&DataKey::Dispute(market_id))
-        .ok_or(InsightArenaError::DisputeNotFound)?;
+        .ok_or(PayaStakesError::DisputeNotFound)?;
 
     if uphold {
         // Return bond to disputer and reopen market for re-resolution.

@@ -10,7 +10,7 @@ const TermsPage = () => {
     {
       id: "acceptance",
       title: "1. Acceptance of Terms",
-      content: "By accessing or using InsightArena, you agree to be bound by these Terms of Service. If you do not agree to all of these terms, do not use the platform. Your continued use signifies your acceptance of any future updates."
+      content: "By accessing or using PayaStakes, you agree to be bound by these Terms of Service. If you do not agree to all of these terms, do not use the platform. Your continued use signifies your acceptance of any future updates."
     },
     {
       id: "responsibilities",
@@ -20,17 +20,17 @@ const TermsPage = () => {
     {
       id: "trading",
       title: "3. Trading Rules",
-      content: "InsightArena provides tools for market analysis and simulated/live trading. Users must adhere to fair trading practices. Any attempt to manipulate market data, exploit latency, or use unauthorized automated bots will result in immediate account suspension."
+      content: "PayaStakes provides tools for market analysis and simulated/live trading. Users must adhere to fair trading practices. Any attempt to manipulate market data, exploit latency, or use unauthorized automated bots will result in immediate account suspension."
     },
     {
       id: "disclaimers",
       title: "4. Disclaimers",
-      content: "InsightArena provides data 'as is' without warranties of any kind. We do not guarantee the accuracy, completeness, or timeliness of financial data. All trading involves risk, and users should perform their own due diligence."
+      content: "PayaStakes provides data 'as is' without warranties of any kind. We do not guarantee the accuracy, completeness, or timeliness of financial data. All trading involves risk, and users should perform their own due diligence."
     },
     {
       id: "liability",
       title: "5. Limitation of Liability",
-      content: "To the maximum extent permitted by law, InsightArena and its affiliates shall not be liable for any indirect, incidental, or consequential damages, including loss of profits, data, or funds resulting from your use of the platform."
+      content: "To the maximum extent permitted by law, PayaStakes and its affiliates shall not be liable for any indirect, incidental, or consequential damages, including loss of profits, data, or funds resulting from your use of the platform."
     }
   ];
 
@@ -87,7 +87,7 @@ const TermsPage = () => {
                 ))}
 
                 <footer className="border-t border-white/10 pt-12 text-sm italic text-gray-300/70">
-                  For legal inquiries, contact: legal@insightarena.com
+                  For legal inquiries, contact: legal@payastakes.com
                 </footer>
               </article>
             </div>

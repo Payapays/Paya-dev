@@ -89,8 +89,8 @@ describe('Auth E2E — challenge → verify flow', () => {
               const cfg: Record<string, string> = {
                 JWT_SECRET: 'super-secret-test-key-min-32-chars!!',
                 JWT_EXPIRES_IN: '1h',
-                JWT_ISSUER: 'insightarena',
-                JWT_AUDIENCE: 'insightarena-users',
+                JWT_ISSUER: 'payastakes',
+                JWT_AUDIENCE: 'payastakes-users',
               };
               return cfg[key];
             }),

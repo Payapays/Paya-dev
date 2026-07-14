@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy | InsightArena</title>
+        <title>Privacy Policy | PayaStakes</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-hidden text-gray-300 font-sans">
@@ -48,10 +48,10 @@ export default function PrivacyPolicy() {
               <section id="introduction">
                 <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
                 <p className="leading-relaxed">
-                  InsightArena ("we," "our," or "us") is dedicated to protecting your privacy while providing a high-performance decentralized prediction market on the Stellar network. This Privacy Policy explains how we collect, use, and protect your information when you interact with our platform.
+                  PayaStakes ("we," "our," or "us") is dedicated to protecting your privacy while providing a high-performance decentralized prediction market on the Stellar network. This Privacy Policy explains how we collect, use, and protect your information when you interact with our platform.
                 </p>
                 <p className="mt-4 leading-relaxed">
-                  As a decentralized application (dApp), InsightArena operates through distributed smart contracts. Much of your interaction occurs directly on the Stellar blockchain, which is a public ledger.
+                  As a decentralized application (dApp), PayaStakes operates through distributed smart contracts. Much of your interaction occurs directly on the Stellar blockchain, which is a public ledger.
                 </p>
               </section>
 
@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-medium text-blue-400 mb-2">Public Blockchain Data</h3>
-                    <p className="leading-relaxed">When you use InsightArena, your Stellar wallet address and any transactions you initiate (such as market creations, predictions, or claims) are recorded on the public Stellar blockchain. This data is permanent and publicly accessible by anyone.</p>
+                    <p className="leading-relaxed">When you use PayaStakes, your Stellar wallet address and any transactions you initiate (such as market creations, predictions, or claims) are recorded on the public Stellar blockchain. This data is permanent and publicly accessible by anyone.</p>
                   </div>
                   <div>
                     <h3 className="text-lg font-medium text-blue-400 mb-2">Usage Data</h3>
@@ -76,7 +76,7 @@ export default function PrivacyPolicy() {
               <section id="cookie-policy">
                 <h2 className="text-2xl font-semibold text-white mb-4">3. Cookie Policy</h2>
                 <p className="mb-4 leading-relaxed">
-                  InsightArena uses only essential cookies and similar technologies to ensure basic website functionality and to remember your preferences (e.g., wallet connection status).
+                  PayaStakes uses only essential cookies and similar technologies to ensure basic website functionality and to remember your preferences (e.g., wallet connection status).
                 </p>
                 <ul className="list-disc list-inside space-y-3 pl-4">
                   <li><span className="text-white font-medium">Session Cookies:</span> Temporary cookies that expire when you close your browser.</li>
@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
               <section id="third-party">
                 <h2 className="text-2xl font-semibold text-white mb-4">4. Third-Party Services</h2>
                 <p className="mb-4 leading-relaxed">
-                  InsightArena leverages third-party infrastructure to provide its services:
+                  PayaStakes leverages third-party infrastructure to provide its services:
                 </p>
                 <ul className="list-disc list-inside space-y-3 pl-4">
                   <li><span className="text-white font-medium">Stellar Network:</span> All smart contract logic and payouts are handled via the Stellar blockchain.</li>
@@ -110,7 +110,7 @@ export default function PrivacyPolicy() {
                 <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
                   <p className="text-amber-400 text-sm flex items-center gap-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                    Note: Data recorded on the Stellar blockchain cannot be modified or deleted by InsightArena.
+                    Note: Data recorded on the Stellar blockchain cannot be modified or deleted by PayaStakes.
                   </p>
                 </div>
               </section>
@@ -123,15 +123,15 @@ export default function PrivacyPolicy() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 flex flex-col items-center">
                     <span className="text-white font-medium mb-1">Email</span>
-                    <a href="mailto:privacy@insightarena.com" className="text-blue-400 hover:text-blue-300 text-sm">Contact Support</a>
+                    <a href="mailto:privacy@payastakes.com" className="text-blue-400 hover:text-blue-300 text-sm">Contact Support</a>
                   </div>
                   <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 flex flex-col items-center">
                     <span className="text-white font-medium mb-1">Discord</span>
-                    <a href="https://discord.gg/InsightArena" className="text-blue-400 hover:text-blue-300 text-sm">Join Community</a>
+                    <a href="https://discord.gg/PayaStakes" className="text-blue-400 hover:text-blue-300 text-sm">Join Community</a>
                   </div>
                   <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 flex flex-col items-center">
                     <span className="text-white font-medium mb-1">Twitter</span>
-                    <a href="https://twitter.com/InsightArena" className="text-blue-400 hover:text-blue-300 text-sm">@InsightArena</a>
+                    <a href="https://twitter.com/PayaStakes" className="text-blue-400 hover:text-blue-300 text-sm">@PayaStakes</a>
                   </div>
                 </div>
               </section>

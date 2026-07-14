@@ -1,7 +1,7 @@
 use soroban_sdk::{Address, Env, Map, Symbol, Vec};
 
 use crate::config::{self, PERSISTENT_BUMP, PERSISTENT_THRESHOLD};
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::escrow;
 use crate::market;
 use crate::storage_types::{DataKey, LPPosition, LiquidityPool, SwapRecord};
@@ -25,32 +25,32 @@ pub fn calculate_swap_output(
     reserve_in: i128,
     reserve_out: i128,
     fee_bps: u32,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     if amount_in <= 0 || reserve_in <= 0 || reserve_out <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let numerator = amount_in
         .checked_mul(reserve_out)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let denominator = reserve_in
         .checked_add(amount_in)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let amount_out = numerator
         .checked_div(denominator)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let fee_multiplier = 10_000i128
         .checked_sub(fee_bps as i128)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let amount_out_with_fee = amount_out
         .checked_mul(fee_multiplier)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(10_000)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     Ok(amount_out_with_fee)
 }
@@ -81,24 +81,24 @@ fn bump_lp_provider_list(env: &Env, market_id: u64) {
     );
 }
 
-fn get_pool(env: &Env, market_id: u64) -> Result<LiquidityPool, InsightArenaError> {
+fn get_pool(env: &Env, market_id: u64) -> Result<LiquidityPool, PayaStakesError> {
     bump_pool(env, market_id);
     env.storage()
         .persistent()
         .get(&DataKey::LiquidityPool(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)
+        .ok_or(PayaStakesError::MarketNotFound)
 }
 
 fn get_lp_position(
     env: &Env,
     provider: &Address,
     market_id: u64,
-) -> Result<LPPosition, InsightArenaError> {
+) -> Result<LPPosition, PayaStakesError> {
     bump_lp_position(env, market_id, provider);
     env.storage()
         .persistent()
         .get(&DataKey::LPPosition(market_id, provider.clone()))
-        .ok_or(InsightArenaError::PredictionNotFound)
+        .ok_or(PayaStakesError::PredictionNotFound)
 }
 
 fn save_pool(env: &Env, pool: &LiquidityPool) {
@@ -136,16 +136,16 @@ pub fn calculate_liquidity_value(
     lp_tokens: i128,
     total_lp_supply: i128,
     total_liquidity: i128,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     if lp_tokens <= 0 || total_lp_supply <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let value = lp_tokens
         .checked_mul(total_liquidity)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(total_lp_supply)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     Ok(value)
 }
@@ -156,9 +156,9 @@ pub fn calculate_lp_tokens(
     deposit_amount: i128,
     total_liquidity: i128,
     total_lp_supply: i128,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     if deposit_amount <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     // First deposit: mint tokens equal to deposit
@@ -169,9 +169,9 @@ pub fn calculate_lp_tokens(
     // Subsequent deposits: mint proportionally
     let lp_tokens = deposit_amount
         .checked_mul(total_lp_supply)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(total_liquidity)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     Ok(lp_tokens)
 }
@@ -182,16 +182,16 @@ pub fn add_liquidity(
     provider: Address,
     market_id: u64,
     amount: i128,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     config::ensure_not_paused(env)?;
 
     if amount < MIN_LIQUIDITY {
-        return Err(InsightArenaError::StakeTooLow);
+        return Err(PayaStakesError::StakeTooLow);
     }
 
     let mkt = market::get_market(env, market_id)?;
     if mkt.is_resolved || mkt.is_cancelled {
-        return Err(InsightArenaError::MarketExpired);
+        return Err(PayaStakesError::MarketExpired);
     }
 
     escrow::lock_stake(env, &provider, amount)?;
@@ -206,11 +206,11 @@ pub fn add_liquidity(
         pool.total_liquidity = pool
             .total_liquidity
             .checked_add(amount)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
         pool.lp_token_supply = pool
             .lp_token_supply
             .checked_add(lp_tokens)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
         (lp_tokens, pool)
     } else {
         let mut reserves = Map::new(env);
@@ -250,19 +250,19 @@ pub fn remove_liquidity(
     provider: Address,
     market_id: u64,
     lp_tokens: i128,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     provider.require_auth();
     config::ensure_not_paused(env)?;
 
     if lp_tokens <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let mut pool = get_pool(env, market_id)?;
     let mut position = get_lp_position(env, &provider, market_id)?;
 
     if position.lp_tokens < lp_tokens {
-        return Err(InsightArenaError::InsufficientFunds);
+        return Err(PayaStakesError::InsufficientFunds);
     }
 
     let withdrawal_amount =
@@ -271,16 +271,16 @@ pub fn remove_liquidity(
     pool.lp_token_supply = pool
         .lp_token_supply
         .checked_sub(lp_tokens)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     pool.total_liquidity = pool
         .total_liquidity
         .checked_sub(withdrawal_amount)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     position.lp_tokens = position
         .lp_tokens
         .checked_sub(lp_tokens)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     save_pool(env, &pool);
     if position.lp_tokens > 0 {
@@ -307,16 +307,16 @@ pub fn swap_outcome(
     to_outcome: Symbol,
     amount_in: i128,
     min_amount_out: i128,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     config::ensure_not_paused(env)?;
 
     if amount_in <= 0 || from_outcome == to_outcome {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let mkt = market::get_market(env, market_id)?;
     if mkt.is_resolved || mkt.is_cancelled {
-        return Err(InsightArenaError::MarketExpired);
+        return Err(PayaStakesError::MarketExpired);
     }
 
     let mut pool = get_pool(env, market_id)?;
@@ -324,23 +324,23 @@ pub fn swap_outcome(
     let from_reserve = pool
         .outcome_reserves
         .get(from_outcome.clone())
-        .ok_or(InsightArenaError::InvalidOutcome)?;
+        .ok_or(PayaStakesError::InvalidOutcome)?;
     let to_reserve = pool
         .outcome_reserves
         .get(to_outcome.clone())
-        .ok_or(InsightArenaError::InvalidOutcome)?;
+        .ok_or(PayaStakesError::InvalidOutcome)?;
 
     let amount_out = calculate_swap_output(amount_in, from_reserve, to_reserve, pool.fee_bps)?;
 
     if amount_out < min_amount_out {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let fee_amount = amount_in
         .checked_mul(pool.fee_bps as i128)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(10_000)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     escrow::lock_stake(env, &trader, amount_in)?;
 
@@ -348,13 +348,13 @@ pub fn swap_outcome(
         from_outcome.clone(),
         from_reserve
             .checked_add(amount_in)
-            .ok_or(InsightArenaError::Overflow)?,
+            .ok_or(PayaStakesError::Overflow)?,
     );
     pool.outcome_reserves.set(
         to_outcome.clone(),
         to_reserve
             .checked_sub(amount_out)
-            .ok_or(InsightArenaError::Overflow)?,
+            .ok_or(PayaStakesError::Overflow)?,
     );
 
     save_pool(env, &pool);
@@ -391,7 +391,7 @@ fn distribute_fees_to_lps(
     env: &Env,
     market_id: u64,
     fee_amount: i128,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let providers: Vec<Address> = env
         .storage()
         .persistent()
@@ -404,14 +404,14 @@ fn distribute_fees_to_lps(
 
     let fee_per_lp = fee_amount
         .checked_div(providers.len() as i128)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     for provider in providers.iter() {
         if let Ok(mut position) = get_lp_position(env, &provider, market_id) {
             position.fees_earned = position
                 .fees_earned
                 .checked_add(fee_per_lp)
-                .ok_or(InsightArenaError::Overflow)?;
+                .ok_or(PayaStakesError::Overflow)?;
             save_lp_position(env, &position);
         }
     }
@@ -424,12 +424,12 @@ pub fn get_outcome_price(
     env: &Env,
     market_id: u64,
     outcome: Symbol,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     let pool = get_pool(env, market_id)?;
     let reserve = pool
         .outcome_reserves
         .get(outcome)
-        .ok_or(InsightArenaError::InvalidOutcome)?;
+        .ok_or(PayaStakesError::InvalidOutcome)?;
     Ok(reserve)
 }
 
@@ -438,7 +438,7 @@ pub fn get_lp_position_public(
     env: &Env,
     provider: Address,
     market_id: u64,
-) -> Result<LPPosition, InsightArenaError> {
+) -> Result<LPPosition, PayaStakesError> {
     get_lp_position(env, &provider, market_id)
 }
 
@@ -477,13 +477,13 @@ pub fn collect_lp_fees(
     env: &Env,
     provider: Address,
     market_id: u64,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     provider.require_auth();
 
     let mut position = get_lp_position(env, &provider, market_id)?;
 
     if position.fees_earned == 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let fees = position.fees_earned;

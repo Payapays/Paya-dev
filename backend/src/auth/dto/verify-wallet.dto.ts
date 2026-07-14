@@ -11,7 +11,7 @@ export class VerifyWalletDto {
   stellar_address: string;
 
   @ApiProperty({
-    example: 'InsightArena:dispute:123456789:abcdef',
+    example: 'PayaStakes:dispute:123456789:abcdef',
     description: 'The plaintext challenge that was signed',
   })
   @IsString()

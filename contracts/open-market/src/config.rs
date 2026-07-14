@@ -1,6 +1,6 @@
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Symbol, Vec};
 
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::storage_types::DataKey;
 
 // ── TTL constants ─────────────────────────────────────────────────────────────
@@ -125,16 +125,16 @@ fn bump_config(env: &Env) {
 
 /// Load Config from persistent storage.
 /// Returns `NotInitialized` if the key is absent rather than panicking.
-fn load_config(env: &Env) -> Result<Config, InsightArenaError> {
+fn load_config(env: &Env) -> Result<Config, PayaStakesError> {
     env.storage()
         .persistent()
         .get(&DataKey::Config)
-        .ok_or(InsightArenaError::NotInitialized)
+        .ok_or(PayaStakesError::NotInitialized)
 }
 
-fn validate_protocol_fee(fee_bps: u32) -> Result<(), InsightArenaError> {
+fn validate_protocol_fee(fee_bps: u32) -> Result<(), PayaStakesError> {
     if fee_bps > 10_000 {
-        return Err(InsightArenaError::InvalidFee);
+        return Err(PayaStakesError::InvalidFee);
     }
 
     Ok(())
@@ -152,9 +152,9 @@ pub fn initialize(
     oracle: Address,
     fee_bps: u32,
     xlm_token: Address,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     if env.storage().persistent().has(&DataKey::Config) {
-        return Err(InsightArenaError::AlreadyInitialized);
+        return Err(PayaStakesError::AlreadyInitialized);
     }
 
     validate_protocol_fee(fee_bps)?;
@@ -193,7 +193,7 @@ pub(crate) fn default_categories(env: &Env) -> Vec<Symbol> {
 }
 
 /// Return the current global [`Config`] and extend its TTL.
-pub fn get_config(env: &Env) -> Result<Config, InsightArenaError> {
+pub fn get_config(env: &Env) -> Result<Config, PayaStakesError> {
     let config = load_config(env)?;
     bump_config(env);
     Ok(config)
@@ -203,12 +203,12 @@ pub fn get_config(env: &Env) -> Result<Config, InsightArenaError> {
 ///
 /// This helper is intended for strict view functions that must avoid any state
 /// writes, including TTL extension side-effects.
-pub fn get_config_readonly(env: &Env) -> Result<Config, InsightArenaError> {
+pub fn get_config_readonly(env: &Env) -> Result<Config, PayaStakesError> {
     load_config(env)
 }
 
 /// Update the protocol fee rate. Caller must be the stored admin.
-pub fn update_protocol_fee(env: &Env, new_fee_bps: u32) -> Result<(), InsightArenaError> {
+pub fn update_protocol_fee(env: &Env, new_fee_bps: u32) -> Result<(), PayaStakesError> {
     let mut config = load_config(env)?;
 
     // Authorisation check — reverts the entire transaction if auth is absent.
@@ -226,7 +226,7 @@ pub fn update_protocol_fee(env: &Env, new_fee_bps: u32) -> Result<(), InsightAre
 pub fn update_protocol_fee_from_governance(
     env: &Env,
     new_fee_bps: u32,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let mut config = load_config(env)?;
     validate_protocol_fee(new_fee_bps)?;
     config.protocol_fee_bps = new_fee_bps;
@@ -238,8 +238,8 @@ pub fn update_protocol_fee_from_governance(
 /// Pause or resume the contract. Caller must be the stored admin.
 ///
 /// When `paused` is `true`, all non-admin entry points should call
-/// [`ensure_not_paused`] and revert with [`InsightArenaError::Paused`].
-pub fn set_paused(env: &Env, paused: bool) -> Result<(), InsightArenaError> {
+/// [`ensure_not_paused`] and revert with [`PayaStakesError::Paused`].
+pub fn set_paused(env: &Env, paused: bool) -> Result<(), PayaStakesError> {
     let mut config = load_config(env)?;
 
     config.admin.require_auth();
@@ -251,7 +251,7 @@ pub fn set_paused(env: &Env, paused: bool) -> Result<(), InsightArenaError> {
     Ok(())
 }
 
-pub fn transfer_admin(env: &Env, new_admin: Address) -> Result<(), InsightArenaError> {
+pub fn transfer_admin(env: &Env, new_admin: Address) -> Result<(), PayaStakesError> {
     let mut config = load_config(env)?;
 
     // Auth against the *current* admin before overwriting.
@@ -271,14 +271,14 @@ pub fn update_oracle(
     env: &Env,
     admin: Address,
     new_oracle: Address,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let mut config = load_config(env)?;
 
     // Auth against the *current* admin.
     admin.require_auth();
 
     if admin != config.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let old_oracle = config.oracle_address;
@@ -307,11 +307,11 @@ fn emit_oracle_updated(env: &Env, old_oracle: &Address, new_oracle: &Address) {
 /// - Returns `Err(NotInitialized)` if the contract has not been set up yet.
 /// - Returns `Err(Paused)` while `config.is_paused == true`.
 /// - Returns `Ok(())` otherwise, extending the Config TTL as a side-effect.
-pub(crate) fn ensure_not_paused(env: &Env) -> Result<(), InsightArenaError> {
+pub(crate) fn ensure_not_paused(env: &Env) -> Result<(), PayaStakesError> {
     let config = load_config(env)?;
     bump_config(env);
     if config.is_paused {
-        return Err(InsightArenaError::Paused);
+        return Err(PayaStakesError::Paused);
     }
     Ok(())
 }

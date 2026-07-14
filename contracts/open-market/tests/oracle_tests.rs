@@ -1,8 +1,8 @@
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
-use insightarena_contract::market::CreateMarketParams;
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::market::CreateMarketParams;
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 
 fn register_token(env: &Env) -> Address {
     let token_admin = Address::generate(env);
@@ -10,9 +10,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -70,7 +70,7 @@ fn resolve_market_unauthorized() {
     env.ledger().set_timestamp(env.ledger().timestamp() + 2000);
 
     let result = client.try_resolve_market(&random, &id, &symbol_short!("yes"));
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -88,7 +88,7 @@ fn resolve_market_too_early() {
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("yes"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketStillOpen))
+        Err(Ok(PayaStakesError::MarketStillOpen))
     ));
 }
 
@@ -108,7 +108,7 @@ fn resolve_market_already_resolved() {
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("yes"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyResolved))
+        Err(Ok(PayaStakesError::MarketAlreadyResolved))
     ));
 }
 
@@ -123,7 +123,7 @@ fn resolve_market_invalid_outcome() {
     env.ledger().set_timestamp(env.ledger().timestamp() + 2000);
 
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("maybe"));
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidOutcome))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidOutcome))));
 }
 
 #[test]
@@ -144,7 +144,7 @@ fn update_oracle_and_resolve() {
 
     // Old oracle cannot resolve
     let result = client.try_resolve_market(&old_oracle, &id, &symbol_short!("yes"));
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 
     // New oracle can resolve
     client.resolve_market(&new_oracle, &id, &symbol_short!("yes"));
@@ -162,7 +162,7 @@ fn update_oracle_unauthorized() {
     let new_oracle = Address::generate(&env);
 
     let result = client.try_update_oracle(&random, &new_oracle);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 // ── Issue #534: three additional named tests ──────────────────────────────────
@@ -179,7 +179,7 @@ fn test_resolve_market_invalid_outcome() {
     env.ledger().set_timestamp(env.ledger().timestamp() + 2000);
 
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("maybe"));
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidOutcome))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidOutcome))));
 }
 
 #[test]
@@ -199,7 +199,7 @@ fn test_resolve_already_resolved_market() {
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("yes"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyResolved))
+        Err(Ok(PayaStakesError::MarketAlreadyResolved))
     ));
 }
 
@@ -216,7 +216,7 @@ fn test_resolve_market_too_early() {
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("yes"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketStillOpen))
+        Err(Ok(PayaStakesError::MarketStillOpen))
     ));
 }
 
@@ -234,7 +234,7 @@ fn test_resolve_market_before_resolution_time() {
     let result = client.try_resolve_market(&oracle, &id, &symbol_short!("yes"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketStillOpen))
+        Err(Ok(PayaStakesError::MarketStillOpen))
     ));
 }
 
@@ -252,7 +252,7 @@ fn resolve_market_rejects_one_second_before_and_succeeds_at_resolution_time() {
 
     env.ledger().set_timestamp(now + 3599);
     let early = client.try_resolve_market(&oracle, &id, &symbol_short!("yes"));
-    assert!(matches!(early, Err(Ok(InsightArenaError::MarketStillOpen))));
+    assert!(matches!(early, Err(Ok(PayaStakesError::MarketStillOpen))));
 
     env.ledger().set_timestamp(now + 3600);
     client.resolve_market(&oracle, &id, &symbol_short!("yes"));

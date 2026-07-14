@@ -671,7 +671,7 @@ export default function CreateEventForm() {
           {/* Share buttons */}
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href={`https://twitter.com/intent/tweet?text=Join+my+prediction+event+on+InsightArena%21+Code%3A+${inviteCode}`}
+              href={`https://twitter.com/intent/tweet?text=Join+my+prediction+event+on+PayaStakes%21+Code%3A+${inviteCode}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/10"
@@ -680,7 +680,7 @@ export default function CreateEventForm() {
               Share on X
             </a>
             <a
-              href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=Join+my+prediction+event+on+InsightArena%21`}
+              href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=Join+my+prediction+event+on+PayaStakes%21`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm text-slate-300 transition hover:border-white/20 hover:bg-white/10"

@@ -1,5 +1,5 @@
 use crate::config::{self, PERSISTENT_BUMP, PERSISTENT_THRESHOLD};
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::escrow;
 use crate::storage_types::{
     DataKey, LeaderboardEntry, LeaderboardSnapshot, RewardPayout, Season, UserProfile,
@@ -16,12 +16,12 @@ const STROOPS_PER_STAKE_POINT: i128 = 100_000_000;
 pub fn get_leaderboard_snapshot(
     env: &Env,
     season_id: u32,
-) -> Result<LeaderboardSnapshot, InsightArenaError> {
+) -> Result<LeaderboardSnapshot, PayaStakesError> {
     let key = DataKey::Leaderboard(season_id);
     env.storage()
         .persistent()
         .get(&key)
-        .ok_or(InsightArenaError::SeasonNotFound)
+        .ok_or(PayaStakesError::SeasonNotFound)
 }
 
 /// Store a leaderboard snapshot.
@@ -192,12 +192,12 @@ pub(crate) fn track_user_profile(env: &Env, address: &Address) {
     }
 }
 
-pub fn load_season(env: &Env, season_id: u32) -> Result<Season, InsightArenaError> {
+pub fn load_season(env: &Env, season_id: u32) -> Result<Season, PayaStakesError> {
     let season = env
         .storage()
         .persistent()
         .get(&DataKey::Season(season_id))
-        .ok_or(InsightArenaError::SeasonNotFound)?;
+        .ok_or(PayaStakesError::SeasonNotFound)?;
     bump_season(env, season_id);
     Ok(season)
 }
@@ -229,7 +229,7 @@ fn distribute_proportional_pool(
     env: &Env,
     entries: &Vec<LeaderboardEntry>,
     pool: i128,
-) -> Result<Vec<RewardPayout>, InsightArenaError> {
+) -> Result<Vec<RewardPayout>, PayaStakesError> {
     let mut payouts = Vec::new(env);
     if entries.is_empty() || pool == 0 {
         return Ok(payouts);
@@ -239,11 +239,11 @@ fn distribute_proportional_pool(
     for entry in entries.iter() {
         total_points = total_points
             .checked_add(entry.points)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
     }
 
     if total_points == 0 {
-        let first = entries.get(0).ok_or(InsightArenaError::InvalidInput)?;
+        let first = entries.get(0).ok_or(PayaStakesError::InvalidInput)?;
         payouts.push_back(RewardPayout {
             rank: first.rank,
             user: first.user,
@@ -259,24 +259,24 @@ fn distribute_proportional_pool(
     for entry in entries.iter() {
         let amount = if index == last_index {
             pool.checked_sub(distributed)
-                .ok_or(InsightArenaError::Overflow)?
+                .ok_or(PayaStakesError::Overflow)?
         } else {
             pool.checked_mul(entry.points as i128)
-                .ok_or(InsightArenaError::Overflow)?
+                .ok_or(PayaStakesError::Overflow)?
                 .checked_div(total_points as i128)
-                .ok_or(InsightArenaError::Overflow)?
+                .ok_or(PayaStakesError::Overflow)?
         };
 
         distributed = distributed
             .checked_add(amount)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
 
         payouts.push_back(RewardPayout {
             rank: entry.rank,
             user: entry.user,
             amount,
         });
-        index = index.checked_add(1).ok_or(InsightArenaError::Overflow)?;
+        index = index.checked_add(1).ok_or(PayaStakesError::Overflow)?;
     }
 
     Ok(payouts)
@@ -285,7 +285,7 @@ fn distribute_proportional_pool(
 fn merge_reward_payouts(
     env: &Env,
     payouts: Vec<RewardPayout>,
-) -> Result<Vec<RewardPayout>, InsightArenaError> {
+) -> Result<Vec<RewardPayout>, PayaStakesError> {
     let mut merged = Vec::new(env);
 
     for payout in payouts.iter() {
@@ -294,17 +294,17 @@ fn merge_reward_payouts(
         let mut idx = 0_u32;
         while idx < merged.len() {
             let mut existing: RewardPayout =
-                merged.get(idx).ok_or(InsightArenaError::InvalidInput)?;
+                merged.get(idx).ok_or(PayaStakesError::InvalidInput)?;
             if existing.user == payout.user {
                 existing.amount = existing
                     .amount
                     .checked_add(payout.amount)
-                    .ok_or(InsightArenaError::Overflow)?;
+                    .ok_or(PayaStakesError::Overflow)?;
                 merged.set(idx, existing);
                 found = true;
                 break;
             }
-            idx = idx.checked_add(1).ok_or(InsightArenaError::Overflow)?;
+            idx = idx.checked_add(1).ok_or(PayaStakesError::Overflow)?;
         }
 
         if !found {
@@ -319,9 +319,9 @@ fn compute_reward_payouts(
     env: &Env,
     snapshot: &LeaderboardSnapshot,
     reward_pool: i128,
-) -> Result<Vec<RewardPayout>, InsightArenaError> {
+) -> Result<Vec<RewardPayout>, PayaStakesError> {
     if snapshot.entries.is_empty() {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let mut raw_payouts = Vec::new(env);
@@ -337,13 +337,13 @@ fn compute_reward_payouts(
         if let Some(share_bps) = fixed_share_bps(entry.rank) {
             let amount = reward_pool
                 .checked_mul(share_bps as i128)
-                .ok_or(InsightArenaError::Overflow)?
+                .ok_or(PayaStakesError::Overflow)?
                 .checked_div(10_000)
-                .ok_or(InsightArenaError::Overflow)?;
+                .ok_or(PayaStakesError::Overflow)?;
 
             fixed_allocated = fixed_allocated
                 .checked_add(amount)
-                .ok_or(InsightArenaError::Overflow)?;
+                .ok_or(PayaStakesError::Overflow)?;
 
             raw_payouts.push_back(RewardPayout {
                 rank: entry.rank,
@@ -358,7 +358,7 @@ fn compute_reward_payouts(
 
     let remaining_pool = reward_pool
         .checked_sub(fixed_allocated)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let proportional_entries = if variable_entries.is_empty() {
         podium_entries
@@ -412,15 +412,15 @@ pub fn create_season(
     start_time: u64,
     end_time: u64,
     reward_pool: i128,
-) -> Result<u32, InsightArenaError> {
+) -> Result<u32, PayaStakesError> {
     let cfg = config::get_config(env)?;
     cfg.admin.require_auth();
     if admin != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     if end_time <= start_time {
-        return Err(InsightArenaError::InvalidTimeRange);
+        return Err(PayaStakesError::InvalidTimeRange);
     }
 
     let total = season_count(env);
@@ -433,7 +433,7 @@ pub fn create_season(
         {
             if !season.is_finalized && season.start_time < end_time && start_time < season.end_time
             {
-                return Err(InsightArenaError::SeasonOverlap);
+                return Err(PayaStakesError::SeasonOverlap);
             }
         }
         season_id = season_id.saturating_add(1);
@@ -441,7 +441,7 @@ pub fn create_season(
 
     let season_id = season_count(env)
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     escrow::lock_stake(env, &admin, reward_pool)?;
 
@@ -464,7 +464,7 @@ pub fn create_season(
     Ok(season_id)
 }
 
-pub fn get_season(env: &Env, season_id: u32) -> Result<Season, InsightArenaError> {
+pub fn get_season(env: &Env, season_id: u32) -> Result<Season, PayaStakesError> {
     load_season(env, season_id)
 }
 
@@ -503,30 +503,30 @@ pub fn update_leaderboard(
     admin: Address,
     season_id: u32,
     entries: Vec<LeaderboardEntry>,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let cfg = config::get_config(env)?;
     cfg.admin.require_auth();
     if admin != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let season = load_season(env, season_id)?;
     if season.is_finalized {
-        return Err(InsightArenaError::SeasonAlreadyFinalized);
+        return Err(PayaStakesError::SeasonAlreadyFinalized);
     }
 
     if entries.len() > 100 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let mut expected_rank = 1_u32;
     for entry in entries.iter() {
         if entry.rank != expected_rank {
-            return Err(InsightArenaError::InvalidInput);
+            return Err(PayaStakesError::InvalidInput);
         }
         expected_rank = expected_rank
             .checked_add(1)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
     }
 
     let updated_at = env.ledger().timestamp();
@@ -548,14 +548,14 @@ pub fn update_leaderboard(
 pub fn get_leaderboard(
     env: &Env,
     season_id: u32,
-) -> Result<LeaderboardSnapshot, InsightArenaError> {
+) -> Result<LeaderboardSnapshot, PayaStakesError> {
     load_season(env, season_id)?;
 
     let snapshot = env
         .storage()
         .persistent()
         .get(&DataKey::Leaderboard(season_id))
-        .ok_or(InsightArenaError::SeasonNotFound)?;
+        .ok_or(PayaStakesError::SeasonNotFound)?;
     bump_leaderboard(env, season_id);
     Ok(snapshot)
 }
@@ -563,7 +563,7 @@ pub fn get_leaderboard(
 pub fn get_season_participants(
     env: &Env,
     season_id: u32,
-) -> Result<Vec<Address>, InsightArenaError> {
+) -> Result<Vec<Address>, PayaStakesError> {
     let snapshot = get_leaderboard(env, season_id)?;
     let mut participants = Vec::new(env);
 
@@ -580,19 +580,19 @@ pub fn get_season_participants(
     Ok(participants)
 }
 
-pub fn finalize_season(env: &Env, admin: Address, season_id: u32) -> Result<(), InsightArenaError> {
+pub fn finalize_season(env: &Env, admin: Address, season_id: u32) -> Result<(), PayaStakesError> {
     let cfg = config::get_config(env)?;
     cfg.admin.require_auth();
     if admin != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let mut season = load_season(env, season_id)?;
     if season.is_finalized {
-        return Err(InsightArenaError::SeasonAlreadyFinalized);
+        return Err(PayaStakesError::SeasonAlreadyFinalized);
     }
     if env.ledger().timestamp() < season.end_time {
-        return Err(InsightArenaError::SeasonNotActive);
+        return Err(PayaStakesError::SeasonNotActive);
     }
 
     let snapshot = get_leaderboard(env, season_id)?;
@@ -605,17 +605,17 @@ pub fn finalize_season(env: &Env, admin: Address, season_id: u32) -> Result<(), 
         }
         total_distributed = total_distributed
             .checked_add(payout.amount)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
     }
 
     if total_distributed != season.reward_pool {
-        return Err(InsightArenaError::Overflow);
+        return Err(PayaStakesError::Overflow);
     }
 
     let winner = snapshot
         .entries
         .get(0)
-        .ok_or(InsightArenaError::InvalidInput)?
+        .ok_or(PayaStakesError::InvalidInput)?
         .user;
 
     season.is_finalized = true;
@@ -631,16 +631,16 @@ pub fn reset_season_points(
     env: &Env,
     admin: Address,
     new_season_id: u32,
-) -> Result<u32, InsightArenaError> {
+) -> Result<u32, PayaStakesError> {
     let cfg = config::get_config(env)?;
     cfg.admin.require_auth();
     if admin != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let mut new_season = load_season(env, new_season_id)?;
     if new_season.is_finalized {
-        return Err(InsightArenaError::SeasonAlreadyFinalized);
+        return Err(PayaStakesError::SeasonAlreadyFinalized);
     }
 
     let total = season_count(env);
@@ -683,7 +683,7 @@ pub fn reset_season_points(
             env.storage().persistent().set(&user_key, &profile);
             reset_count = reset_count
                 .checked_add(1)
-                .ok_or(InsightArenaError::Overflow)?;
+                .ok_or(PayaStakesError::Overflow)?;
         }
     }
 

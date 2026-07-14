@@ -1,6 +1,8 @@
-# InsightArena — Backend
+# PayaStakes — Backend
 
-NestJS REST API powering the InsightArena prediction market platform. Handles authentication, market management, predictions, leaderboards, competitions, analytics, and Soroban contract orchestration on the Stellar network.
+NestJS REST API — the infrastructure tier of PayaStakes. Orchestrates the Soroban stakes, escrow, and payout contracts on the Stellar network; aggregates multi-source oracles; indexes on-chain events; and exposes REST/WebSocket surfaces for the consumer frontend and third-party integrations.
+
+Not a bank: this service never custodies user funds. All stakes and payouts are held and released by Soroban contracts — the backend only facilitates.
 
 ---
 
@@ -98,12 +100,15 @@ pnpm run migration:revert
 
 ```
 src/
-├── auth/           # JWT authentication and wallet verification
+├── auth/           # JWT + wallet signature verification (Stellar keypairs)
 ├── users/          # User profiles and management
-├── markets/        # Prediction market CRUD and lifecycle
-├── predictions/    # Prediction submission and resolution
-├── leaderboard/    # Rankings and scoring
-├── competitions/   # Competition management
+├── markets/        # Stake / market CRUD and lifecycle
+├── predictions/    # Stake submission and resolution
+├── leaderboard/    # Rankings and scoring for tournaments and leagues
+├── competitions/   # Private leagues, public tournaments, invite codes
+├── soroban/        # Soroban contract orchestration (stakes, escrow, payouts)
+├── indexer/        # On-chain event indexing and reconciliation
+├── notifications/  # Email + realtime notifications (WebSockets)
 ├── analytics/      # Platform analytics and history
 ├── achievements/   # User achievement tracking
 ├── admin/          # Admin controls and moderation

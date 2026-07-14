@@ -73,8 +73,8 @@ Run prediction events during hackathons to engage participants in side competiti
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-org/InsightArena.git
-   cd InsightArena/contracts/creator-event-manager
+   git clone https://github.com/your-org/PayaStakes.git
+   cd PayaStakes/contracts/creator-event-manager
    ```
 
 2. **Install dependencies**

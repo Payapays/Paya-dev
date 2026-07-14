@@ -197,7 +197,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     const apiKey = this.configService.get<string>('SENDGRID_API_KEY');
     const fromEmail =
       this.configService.get<string>('EMAIL_FROM') ??
-      'notifications@insightarena.app';
+      'notifications@payastakes.app';
 
     if (apiKey) {
       const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -208,7 +208,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
         },
         body: JSON.stringify({
           personalizations: [{ to: [{ email: email.to }] }],
-          from: { email: fromEmail, name: 'InsightArena' },
+          from: { email: fromEmail, name: 'PayaStakes' },
           subject: email.subject,
           content: [
             { type: 'text/plain', value: email.text },

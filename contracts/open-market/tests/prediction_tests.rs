@@ -2,10 +2,10 @@ use soroban_sdk::testutils::{storage::Persistent as _, Address as _, Ledger};
 use soroban_sdk::token::{Client as TokenClient, StellarAssetClient};
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
-use insightarena_contract::config::LEDGER_BUMP_MARKET;
-use insightarena_contract::market::CreateMarketParams;
-use insightarena_contract::storage_types::DataKey;
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::config::LEDGER_BUMP_MARKET;
+use payastakes_contract::market::CreateMarketParams;
+use payastakes_contract::storage_types::DataKey;
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 
 // ── Test helpers ──────────────────────────────────────────────────────────
 
@@ -16,9 +16,9 @@ fn register_token(env: &Env) -> Address {
 }
 
 /// Deploy and initialise the contract; return client + xlm_token address + admin + oracle.
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -84,7 +84,7 @@ fn test_submit_prediction_market_expired() {
 
     let result =
         client.try_submit_prediction(&predictor, &market_id, &symbol_short!("yes"), &stake);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketExpired))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketExpired))));
 }
 
 #[test]
@@ -100,7 +100,7 @@ fn test_submit_prediction_invalid_outcome() {
 
     let result =
         client.try_submit_prediction(&predictor, &market_id, &symbol_short!("maybe"), &stake);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidOutcome))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidOutcome))));
 }
 
 #[test]
@@ -117,7 +117,7 @@ fn test_submit_prediction_stake_too_low() {
 
     let result =
         client.try_submit_prediction(&predictor, &market_id, &symbol_short!("yes"), &stake);
-    assert!(matches!(result, Err(Ok(InsightArenaError::StakeTooLow))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::StakeTooLow))));
 }
 
 #[test]
@@ -134,7 +134,7 @@ fn test_submit_prediction_stake_too_high() {
 
     let result =
         client.try_submit_prediction(&predictor, &market_id, &symbol_short!("yes"), &stake);
-    assert!(matches!(result, Err(Ok(InsightArenaError::StakeTooHigh))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::StakeTooHigh))));
 }
 
 #[test]
@@ -152,7 +152,7 @@ fn test_submit_prediction_already_predicted() {
     let result = client.try_submit_prediction(&predictor, &market_id, &symbol_short!("no"), &stake);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::AlreadyPredicted))
+        Err(Ok(PayaStakesError::AlreadyPredicted))
     ));
 }
 
@@ -201,7 +201,7 @@ fn test_claim_payout_wrong_outcome() {
     client.resolve_market(&oracle, &market_id, &symbol_short!("yes"));
 
     let result = client.try_claim_payout(&predictor, &market_id);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidOutcome))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidOutcome))));
 }
 
 #[test]
@@ -226,7 +226,7 @@ fn test_claim_payout_already_claimed() {
     let result = client.try_claim_payout(&predictor, &market_id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::PayoutAlreadyClaimed))
+        Err(Ok(PayaStakesError::PayoutAlreadyClaimed))
     ));
 }
 
@@ -247,7 +247,7 @@ fn test_claim_payout_before_resolution() {
     let result = client.try_claim_payout(&predictor, &market_id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketNotResolved))
+        Err(Ok(PayaStakesError::MarketNotResolved))
     ));
 }
 
@@ -285,11 +285,11 @@ fn test_batch_distribute_payouts_distributes_to_all_winners() {
     // Winners should have received payouts; verify by checking claimed state
     assert!(matches!(
         client.try_claim_payout(&winner1, &market_id),
-        Err(Ok(InsightArenaError::PayoutAlreadyClaimed))
+        Err(Ok(PayaStakesError::PayoutAlreadyClaimed))
     ));
     assert!(matches!(
         client.try_claim_payout(&winner2, &market_id),
-        Err(Ok(InsightArenaError::PayoutAlreadyClaimed))
+        Err(Ok(PayaStakesError::PayoutAlreadyClaimed))
     ));
 }
 
@@ -327,18 +327,18 @@ fn test_batch_distribute_payouts_pays_all_unclaimed_winners_correctly_idempotent
     // Winners should now be marked as paid
     assert!(matches!(
         client.try_claim_payout(&user1, &market_id),
-        Err(Ok(InsightArenaError::PayoutAlreadyClaimed))
+        Err(Ok(PayaStakesError::PayoutAlreadyClaimed))
     ));
     assert!(matches!(
         client.try_claim_payout(&user2, &market_id),
-        Err(Ok(InsightArenaError::PayoutAlreadyClaimed))
+        Err(Ok(PayaStakesError::PayoutAlreadyClaimed))
     ));
 
     // Losers must remain unaffected
     let losers_claim_result = client.try_claim_payout(&user3, &market_id);
     assert!(matches!(
         losers_claim_result,
-        Err(Ok(InsightArenaError::InvalidOutcome))
+        Err(Ok(PayaStakesError::InvalidOutcome))
     ));
 
     // Second batch: all winning predictions already claimed — returns 0
@@ -367,7 +367,7 @@ fn test_batch_distribute_payouts_fails_for_non_admin() {
     client.resolve_market(&oracle, &market_id, &symbol_short!("yes"));
 
     let result = client.try_batch_distribute_payouts(&random, &market_id);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -389,7 +389,7 @@ fn test_batch_distribute_payouts_fails_on_unresolved_market() {
     let result = client.try_batch_distribute_payouts(&oracle, &market_id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketNotResolved))
+        Err(Ok(PayaStakesError::MarketNotResolved))
     ));
 }
 
@@ -634,7 +634,7 @@ fn test_submit_prediction_on_cancelled_market_fails() {
     let result = client.try_submit_prediction(&user_beta, &market_id, &outcome_side, &stake);
     assert_eq!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyCancelled)) 
+        Err(Ok(PayaStakesError::MarketAlreadyCancelled)) 
     );
 
     // 7. Verify post-cancellation status checks remain accurate

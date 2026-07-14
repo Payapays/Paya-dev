@@ -1,8 +1,8 @@
-# InsightArena Contract Architecture
+# PayaStakes Contract Architecture
 
 ## Overview
 
-The InsightArena Soroban smart contract is the on-chain core of the platform. It manages prediction markets, escrow, seasons, leaderboards, invite codes, governance, liquidity pools, and reputation — all deployed as a single contract on the Stellar network.
+The PayaStakes Soroban smart contract is the on-chain core of the platform. It manages prediction markets, escrow, seasons, leaderboards, invite codes, governance, liquidity pools, and reputation — all deployed as a single contract on the Stellar network.
 
 The backend calls the contract via Soroban RPC (using the `@stellar/stellar-sdk`) to create markets, submit predictions, and resolve outcomes. The frontend reads contract events and state directly via Soroban RPC through the Freighter wallet extension. All financial flows (staking, payouts, refunds, treasury) are handled entirely on-chain.
 
@@ -23,7 +23,7 @@ The backend calls the contract via Soroban RPC (using the `@stellar/stellar-sdk`
 | `liquidity.rs` | AMM pool, LP tokens, swaps, fee distribution | `add_liquidity`, `remove_liquidity`, `swap_outcome`, `get_outcome_price` |
 | `reputation.rs` | Creator stats and reputation scoring | `on_market_created`, `on_market_resolved`, `calculate_creator_reputation`, `get_creator_stats` |
 | `storage_types.rs` | All `DataKey` variants and struct definitions | All types |
-| `errors.rs` | All error codes | `InsightArenaError` enum |
+| `errors.rs` | All error codes | `PayaStakesError` enum |
 
 ---
 

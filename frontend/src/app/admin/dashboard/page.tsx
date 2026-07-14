@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
             <p className="text-sm uppercase tracking-[0.3em] text-orange-400/90">Admin Overview</p>
             <h1 className="mt-2 text-3xl font-semibold text-white">Platform statistics</h1>
             <p className="mt-2 max-w-2xl text-sm text-gray-400">
-              Monitor key health metrics across the InsightArena ecosystem and manage
+              Monitor key health metrics across the PayaStakes ecosystem and manage
               announcements or maintenance workflows from one place.
             </p>
           </div>

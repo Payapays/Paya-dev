@@ -247,7 +247,7 @@ export default function LeaderboardPage() {
                     Public rankings
                   </div>
                   <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                    Track the sharpest predictors on InsightArena
+                    Track the sharpest predictors on PayaStakes
                   </h1>
                   <p className="text-base text-[#9aa4bc] sm:text-lg">
                     Compare win rates, prediction volume, and achievement

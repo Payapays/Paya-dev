@@ -67,7 +67,7 @@ export default function CryptoFAQ() {
               </h1>
               <p className="max-w-2xl text-base text-[#94a3b8]">
                 Find quick answers about crypto basics, tournaments, and how
-                to get started on InsightArena.
+                to get started on PayaStakes.
               </p>
             </div>
 

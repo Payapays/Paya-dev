@@ -43,7 +43,7 @@ export default function HowItWorksSection() {
             <p className="text-xl text-gray-300 mb-12 max-w-lg mx-auto lg:mx-0 leading-relaxed">
               Leverage your knowledge and analytical skills to make accurate
               predictions. Whether you're an expert or just getting started,
-              InsightArena provides the tools to showcase your abilities and earn
+              PayaStakes provides the tools to showcase your abilities and earn
               rewards.
             </p>
           </div>

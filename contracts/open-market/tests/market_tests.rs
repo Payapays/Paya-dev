@@ -1,6 +1,6 @@
-use insightarena_contract::market::{calculate_price, CreateMarketParams};
-use insightarena_contract::storage_types::{DataKey, Market, Prediction};
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::market::{calculate_price, CreateMarketParams};
+use payastakes_contract::storage_types::{DataKey, Market, Prediction};
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::token::{Client as TokenClient, StellarAssetClient};
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
@@ -31,9 +31,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> PayaStakesContractClient<'_> {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -42,9 +42,9 @@ fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
     client
 }
 
-fn deploy_with_actors(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy_with_actors(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -53,9 +53,9 @@ fn deploy_with_actors(env: &Env) -> (InsightArenaContractClient<'_>, Address, Ad
     (client, admin, oracle)
 }
 
-fn deploy_with_token(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy_with_token(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -125,7 +125,7 @@ fn create_market_fails_end_time_in_past() {
     let result = client.try_create_market(&creator, &params);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InvalidTimeRange))
+        Err(Ok(PayaStakesError::InvalidTimeRange))
     ));
 }
 
@@ -142,7 +142,7 @@ fn create_market_fails_resolution_before_end() {
     let result = client.try_create_market(&creator, &params);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InvalidTimeRange))
+        Err(Ok(PayaStakesError::InvalidTimeRange))
     ));
 }
 
@@ -157,7 +157,7 @@ fn create_market_fails_single_outcome() {
     params.outcomes = vec![&env, symbol_short!("yes")];
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -171,7 +171,7 @@ fn create_market_fails_fee_too_high() {
     params.creator_fee_bps = 501;
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidFee))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidFee))));
 }
 
 fn fund(env: &Env, xlm_token: &Address, recipient: &Address, amount: i128) {
@@ -202,7 +202,7 @@ fn update_creator_fee_fails_fee_too_high() {
     let id = client.create_market(&creator, &default_params(&env));
     let result = client.try_update_creator_fee(&creator, &id, &501_u32);
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidFee))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidFee))));
 }
 
 #[test]
@@ -216,7 +216,7 @@ fn update_creator_fee_fails_non_creator() {
     let id = client.create_market(&creator, &default_params(&env));
     let result = client.try_update_creator_fee(&other, &id, &200_u32);
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -232,7 +232,7 @@ fn update_creator_fee_fails_after_end_time() {
     env.ledger().set_timestamp(params.end_time);
 
     let result = client.try_update_creator_fee(&creator, &id, &200_u32);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketExpired))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketExpired))));
 }
 
 #[test]
@@ -272,7 +272,7 @@ fn test_create_market_min_stake_exceeds_max_stake() {
     params.max_stake = 10_000_000;
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -285,15 +285,15 @@ fn create_market_fails_when_paused() {
     client.set_paused(&true);
 
     let result = client.try_create_market(&creator, &default_params(&env));
-    assert!(matches!(result, Err(Ok(InsightArenaError::Paused))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Paused))));
 }
 
 #[test]
 #[should_panic(expected = "HostError: Error(Auth")]
 fn test_create_market_unauthorised() {
     let env = Env::default();
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(&env, &id);
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(&env, &id);
     let admin = Address::generate(&env);
     let oracle = Address::generate(&env);
     let xlm_token = register_token(&env);
@@ -302,13 +302,13 @@ fn test_create_market_unauthorised() {
     client.initialize(&admin, &oracle, &200_u32, &xlm_token);
 
     let env2 = Env::default();
-    let id2 = env2.register(InsightArenaContract, ());
-    let client2 = InsightArenaContractClient::new(&env2, &id2);
+    let id2 = env2.register(PayaStakesContract, ());
+    let client2 = PayaStakesContractClient::new(&env2, &id2);
     let admin2 = Address::generate(&env2);
     let oracle2 = Address::generate(&env2);
     let xlm_token2 = register_token(&env2);
     env2.as_contract(&id2, || {
-        insightarena_contract::config::initialize(&env2, admin2, oracle2, 200, xlm_token2).unwrap();
+        payastakes_contract::config::initialize(&env2, admin2, oracle2, 200, xlm_token2).unwrap();
     });
 
     let creator = Address::generate(&env2);
@@ -326,7 +326,7 @@ fn create_market_fails_stake_too_low() {
     params.min_stake = 1;
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::StakeTooLow))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::StakeTooLow))));
 }
 
 #[test]
@@ -340,7 +340,7 @@ fn create_market_fails_when_category_not_whitelisted() {
     params.category = Symbol::new(&env, "Weather");
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -354,7 +354,7 @@ fn test_create_market_with_duplicate_outcomes() {
     params.outcomes = vec![&env, symbol_short!("yes"), symbol_short!("yes")];
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -398,7 +398,7 @@ fn remove_category_blocks_future_market_creation() {
     params.category = science;
 
     let result = client.try_create_market(&creator, &params);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -413,11 +413,11 @@ fn non_admin_cannot_mutate_categories() {
 
     assert!(matches!(
         add_result,
-        Err(Ok(InsightArenaError::Unauthorized))
+        Err(Ok(PayaStakesError::Unauthorized))
     ));
     assert!(matches!(
         remove_result,
-        Err(Ok(InsightArenaError::Unauthorized))
+        Err(Ok(PayaStakesError::Unauthorized))
     ));
 }
 
@@ -441,7 +441,7 @@ fn get_market_returns_not_found_for_missing_id() {
     let client = deploy(&env);
 
     let result = client.try_get_market(&99_u64);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -646,7 +646,7 @@ fn close_market_fails_before_end_time() {
 
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketStillOpen))
+        Err(Ok(PayaStakesError::MarketStillOpen))
     ));
 }
 
@@ -709,7 +709,7 @@ fn close_market_fails_when_already_resolved() {
     let result = client.try_close_market(&oracle, &id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyResolved))
+        Err(Ok(PayaStakesError::MarketAlreadyResolved))
     ));
 }
 
@@ -725,7 +725,7 @@ fn test_close_market_fails_for_unauthorized_caller() {
     env.ledger().set_timestamp(env.ledger().timestamp() + 1001);
 
     let result = client.try_close_market(&random, &id);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -757,7 +757,7 @@ fn cancel_market_fails_for_non_admin() {
     let id = client.create_market(&creator, &default_params(&env));
     let result = client.try_cancel_market(&random, &id);
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -767,7 +767,7 @@ fn cancel_market_fails_market_not_found() {
     let (client, admin, _oracle, _) = deploy_with_token(&env);
 
     let result = client.try_cancel_market(&admin, &99_u64);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -795,7 +795,7 @@ fn cancel_market_fails_when_already_resolved() {
     let result = client.try_cancel_market(&admin, &id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyResolved))
+        Err(Ok(PayaStakesError::MarketAlreadyResolved))
     ));
 }
 
@@ -812,7 +812,7 @@ fn cancel_market_fails_when_already_cancelled() {
     let result = client.try_cancel_market(&admin, &id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyCancelled))
+        Err(Ok(PayaStakesError::MarketAlreadyCancelled))
     ));
 }
 
@@ -965,7 +965,7 @@ fn cancel_market_refunds_exact_stake_amounts() {
     let result = client.try_submit_prediction(&user1, &id, &symbol_short!("yes"), &stake1);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyCancelled))
+        Err(Ok(PayaStakesError::MarketAlreadyCancelled))
     ));
 }
 
@@ -1018,7 +1018,7 @@ fn extend_market_end_time_fails_non_creator() {
     let id = client.create_market(&creator, &params);
 
     let result = client.try_extend_market_end_time(&other, &id, &(params.end_time + 500));
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -1034,7 +1034,7 @@ fn extend_market_end_time_fails_after_end_time() {
     env.ledger().set_timestamp(params.end_time);
 
     let result = client.try_extend_market_end_time(&creator, &id, &(params.end_time + 500));
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketExpired))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketExpired))));
 }
 
 #[test]
@@ -1048,7 +1048,7 @@ fn extend_market_end_time_fails_new_end_time_not_strictly_later() {
     let id = client.create_market(&creator, &params);
 
     let result = client.try_extend_market_end_time(&creator, &id, &params.end_time);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidTimeRange))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidTimeRange))));
 }
 
 #[test]
@@ -1066,7 +1066,7 @@ fn extend_market_end_time_fails_when_resolved() {
     client.resolve_market(&oracle, &id, &symbol_short!("yes"));
 
     let result = client.try_extend_market_end_time(&creator, &id, &(params.end_time + 500));
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketAlreadyResolved))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketAlreadyResolved))));
 }
 
 #[test]
@@ -1082,7 +1082,7 @@ fn extend_market_end_time_fails_when_cancelled() {
     client.cancel_market(&admin, &id);
 
     let result = client.try_extend_market_end_time(&creator, &id, &(params.end_time + 500));
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketAlreadyCancelled))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketAlreadyCancelled))));
 }
 
 #[test]
@@ -1100,5 +1100,5 @@ fn extend_market_end_time_fails_when_closed() {
 
     env.ledger().set_timestamp(params.end_time);
     let result = client.try_extend_market_end_time(&creator, &id, &(params.end_time + 500));
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketAlreadyClosed))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketAlreadyClosed))));
 }

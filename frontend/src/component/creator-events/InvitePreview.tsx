@@ -240,8 +240,8 @@ export default function InvitePreview({ code }: InvitePreviewProps) {
   }, [event, router]);
 
   const shareText = event
-    ? `Join me in "${event.title}" — a prediction event on InsightArena!`
-    : "Join this prediction event on InsightArena!";
+    ? `Join me in "${event.title}" — a prediction event on PayaStakes!`
+    : "Join this prediction event on PayaStakes!";
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(inviteUrl)}`;
   const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteUrl)}&text=${encodeURIComponent(shareText)}`;

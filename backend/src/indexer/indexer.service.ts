@@ -216,7 +216,7 @@ export class IndexerService implements OnModuleInit {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          id: 'insightarena-indexer',
+          id: 'payastakes-indexer',
           method: 'getEvents',
           params: {
             startLedger: fromLedger,

@@ -2,7 +2,7 @@
 
 # Default target
 help:
-	@echo "InsightArena Contract Build & Test"
+	@echo "PayaStakes Contract Build & Test"
 	@echo "===================================="
 	@echo "Available targets:"
 	@echo "  make build       - Build contract WASM"

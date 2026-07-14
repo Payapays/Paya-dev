@@ -2,7 +2,7 @@
 
 ## 📋 Project Overview
 
-The InsightArena frontend is a modern web application built for a decentralized prediction market platform on the Stellar blockchain. It provides users with an intuitive interface to participate in prediction markets, compete in leaderboards, and manage their rewards.
+The PayaStakes frontend is a modern web application built for a decentralized prediction market platform on the Stellar blockchain. It provides users with an intuitive interface to participate in prediction markets, compete in leaderboards, and manage their rewards.
 
 ### Purpose
 - Enable users to create and participate in prediction markets
@@ -327,7 +327,7 @@ The project structure suggests API integration is handled through:
 ```typescript
 // app/dashboard/page.tsx
 async function DashboardPage() {
-  const data = await fetch('https://api.insightarena.com/user/stats', {
+  const data = await fetch('https://api.payastakes.com/user/stats', {
     cache: 'no-store' // or 'force-cache'
   })
   const stats = await data.json()
@@ -744,8 +744,8 @@ const secretKey = process.env.SECRET_KEY
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/InsightArena.git
-cd InsightArena/frontend
+git clone https://github.com/your-org/PayaStakes.git
+cd PayaStakes/frontend
 
 # Install dependencies
 pnpm install
@@ -1067,7 +1067,7 @@ describe('Button', () => {
 ## 📞 Support
 
 - **Telegram**: https://t.me/+hR9dZKau8f84YTk0
-- **GitHub Issues**: [Create an issue](https://github.com/your-org/InsightArena/issues)
+- **GitHub Issues**: [Create an issue](https://github.com/your-org/PayaStakes/issues)
 - **Documentation**: `/docs` page in the app
 
 ---
@@ -1086,4 +1086,4 @@ describe('Button', () => {
 ---
 
 **Last Updated**: 2024
-**Maintained By**: InsightArena Team
+**Maintained By**: PayaStakes Team

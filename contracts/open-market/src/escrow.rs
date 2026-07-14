@@ -1,16 +1,16 @@
 use soroban_sdk::{token, Address, Env, Vec};
 
 use crate::config::{self, PERSISTENT_BUMP, PERSISTENT_THRESHOLD};
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::storage_types::{DataKey, Market, Prediction};
 
 // ── Reentrancy guard (merged from security.rs) ────────────────────────────────
 
 /// Acquire temporary escrow lock. Returns `Paused` error if already locked.
 /// Temporary storage auto-expires per ledger, preventing persistent state leaks.
-pub fn acquire_escrow_lock(env: &Env) -> Result<(), InsightArenaError> {
+pub fn acquire_escrow_lock(env: &Env) -> Result<(), PayaStakesError> {
     if env.storage().temporary().has(&DataKey::EscrowLock) {
-        return Err(InsightArenaError::Paused);
+        return Err(PayaStakesError::Paused);
     }
     env.storage().temporary().set(&DataKey::EscrowLock, &true);
     Ok(())
@@ -22,7 +22,7 @@ pub fn release_escrow_lock(env: &Env) {
 }
 
 #[cfg(test)]
-pub fn test_simulate_reentrant_call(env: &Env) -> Result<(), InsightArenaError> {
+pub fn test_simulate_reentrant_call(env: &Env) -> Result<(), PayaStakesError> {
     acquire_escrow_lock(env)?;
     let result = acquire_escrow_lock(env);
     release_escrow_lock(env);
@@ -48,12 +48,12 @@ fn bump_treasury(env: &Env) {
 ///
 /// Token transfer panics are handled by the Soroban runtime and surface as
 /// contract failures.
-pub fn lock_stake(env: &Env, from: &Address, amount: i128) -> Result<(), InsightArenaError> {
+pub fn lock_stake(env: &Env, from: &Address, amount: i128) -> Result<(), PayaStakesError> {
     acquire_escrow_lock(env)?;
 
     if amount <= 0 {
         release_escrow_lock(env);
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     from.require_auth();
@@ -81,12 +81,12 @@ pub fn lock_stake(env: &Env, from: &Address, amount: i128) -> Result<(), Insight
 /// - `InvalidInput` when `amount <= 0`.
 /// - `EscrowEmpty` when the contract balance cannot cover the refund.
 /// - Propagates any error returned by [`config::get_config`].
-pub fn refund(env: &Env, to: &Address, amount: i128) -> Result<(), InsightArenaError> {
+pub fn refund(env: &Env, to: &Address, amount: i128) -> Result<(), PayaStakesError> {
     acquire_escrow_lock(env)?;
 
     if amount <= 0 {
         release_escrow_lock(env);
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let cfg = config::get_config(env)?;
@@ -95,7 +95,7 @@ pub fn refund(env: &Env, to: &Address, amount: i128) -> Result<(), InsightArenaE
 
     if client.balance(&contract) < amount {
         release_escrow_lock(env);
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     client.transfer(&contract, to, &amount);
@@ -108,12 +108,12 @@ pub fn refund(env: &Env, to: &Address, amount: i128) -> Result<(), InsightArenaE
 ///
 /// This is semantically distinct from `refund` (used for market cancellation),
 /// but uses the same escrow transfer path from contract balance to recipient.
-pub fn release_payout(env: &Env, to: &Address, amount: i128) -> Result<(), InsightArenaError> {
+pub fn release_payout(env: &Env, to: &Address, amount: i128) -> Result<(), PayaStakesError> {
     acquire_escrow_lock(env)?;
 
     if amount <= 0 {
         release_escrow_lock(env);
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let cfg = config::get_config(env)?;
@@ -122,7 +122,7 @@ pub fn release_payout(env: &Env, to: &Address, amount: i128) -> Result<(), Insig
 
     if client.balance(&contract) < amount {
         release_escrow_lock(env);
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     client.transfer(&contract, to, &amount);
@@ -149,7 +149,7 @@ pub fn get_contract_balance(env: &Env) -> i128 {
 /// aggregate against the token contract's live balance rather than trusting a
 /// mirrored counter. It is used both as an externally callable admin audit aid
 /// and as an automatic post-condition after batch payout distribution.
-pub fn assert_escrow_solvent(env: &Env) -> Result<(), InsightArenaError> {
+pub fn assert_escrow_solvent(env: &Env) -> Result<(), PayaStakesError> {
     let market_count: u64 = env
         .storage()
         .persistent()
@@ -193,7 +193,7 @@ pub fn assert_escrow_solvent(env: &Env) -> Result<(), InsightArenaError> {
 
                 total_unclaimed_stakes = total_unclaimed_stakes
                     .checked_add(prediction.stake_amount)
-                    .ok_or(InsightArenaError::Overflow)?;
+                    .ok_or(PayaStakesError::Overflow)?;
             }
         }
 
@@ -201,7 +201,7 @@ pub fn assert_escrow_solvent(env: &Env) -> Result<(), InsightArenaError> {
     }
 
     if get_contract_balance(env) < total_unclaimed_stakes {
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     Ok(())
@@ -241,34 +241,34 @@ pub fn transfer_fee(
     admin: &Address,
     to: &Address,
     amount: i128,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     if amount <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let cfg = config::get_config(env)?;
     admin.require_auth();
     if admin != &cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let treasury_balance = get_treasury_balance(env);
     if treasury_balance < amount {
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     let client = token::Client::new(env, &cfg.xlm_token);
     let contract = env.current_contract_address();
 
     if client.balance(&contract) < amount {
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     client.transfer(&contract, to, &amount);
 
     let next_treasury_balance = treasury_balance
         .checked_sub(amount)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     env.storage()
         .persistent()
         .set(&DataKey::Treasury, &next_treasury_balance);
@@ -287,16 +287,16 @@ pub fn transfer_fee(
 /// - `Unauthorized` when caller is not the admin.
 /// - `InsufficientFunds` when `amount` exceeds the tracked treasury balance.
 /// - `EscrowEmpty` if the contract token balance cannot cover the withdrawal.
-pub fn withdraw_treasury(env: Env, caller: Address, amount: i128) -> Result<(), InsightArenaError> {
+pub fn withdraw_treasury(env: Env, caller: Address, amount: i128) -> Result<(), PayaStakesError> {
     if amount <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     caller.require_auth();
 
     let cfg = config::get_config(&env)?;
     if caller != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let treasury_balance: i128 = env
@@ -306,14 +306,14 @@ pub fn withdraw_treasury(env: Env, caller: Address, amount: i128) -> Result<(), 
         .unwrap_or(0);
 
     if amount > treasury_balance {
-        return Err(InsightArenaError::InsufficientFunds);
+        return Err(PayaStakesError::InsufficientFunds);
     }
 
     let client = token::Client::new(&env, &cfg.xlm_token);
     let contract = env.current_contract_address();
 
     if client.balance(&contract) < amount {
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     client.transfer(&contract, &caller, &amount);

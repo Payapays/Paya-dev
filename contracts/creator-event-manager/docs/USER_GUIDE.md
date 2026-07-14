@@ -1,4 +1,4 @@
-# InsightArena Creator Event Manager - User Guide
+# PayaStakes Creator Event Manager - User Guide
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@
 
 ## Introduction
 
-InsightArena's Creator Event Manager is a Soroban smart contract that enables anyone to host prediction events on the Stellar network. This guide explains how to interact with the contract as a creator.
+PayaStakes's Creator Event Manager is a Soroban smart contract that enables anyone to host prediction events on the Stellar network. This guide explains how to interact with the contract as a creator.
 
 The contract supports:
 - **XLM-based entry fees** for prediction events
@@ -228,12 +228,12 @@ The response includes the `invite_code` field.
 1. **Direct Message** - Send the code privately to specific users
 2. **Social Media** - Post publicly for open events
 3. **QR Code** - Generate a QR code containing the invite code
-4. **Deep Link** - Create a web link: `https://insightarena.app/join?code=K7M9P2Q5`
+4. **Deep Link** - Create a web link: `https://payastakes.app/join?code=K7M9P2Q5`
 
 #### Example Sharing Message
 
 ```
-🎯 Join my InsightArena prediction event!
+🎯 Join my PayaStakes prediction event!
 
 Event: FIFA World Cup Quarter-Finals
 Participants: 0/500
@@ -241,7 +241,7 @@ Matches: 4
 
 Invite Code: K7M9P2Q5
 
-Join now: https://insightarena.app/join?code=K7M9P2Q5
+Join now: https://payastakes.app/join?code=K7M9P2Q5
 ```
 
 #### Verification
@@ -431,7 +431,7 @@ verified within 2 hours of final whistle."
 
 ## Summary
 
-As a creator, you have powerful tools to host engaging prediction events on InsightArena. Remember:
+As a creator, you have powerful tools to host engaging prediction events on PayaStakes. Remember:
 
 1. **Create** events with clear titles and descriptions
 2. **Add matches** with accurate team names and times

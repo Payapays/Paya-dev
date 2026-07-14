@@ -116,7 +116,7 @@ export default function ComparisonSection() {
             </ul>
           </motion.div>
 
-          {/* Right Card — InsightArena */}
+          {/* Right Card — PayaStakes */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -125,7 +125,7 @@ export default function ComparisonSection() {
             className="bg-gray-950/60 border border-[#1e2d45] rounded-xl p-7"
           >
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">
-              InsightArena
+              PayaStakes
             </h3>
             <ul className="flex flex-col gap-4 font-medium text-gray-300">
               {rightItems.map((item, i) => (

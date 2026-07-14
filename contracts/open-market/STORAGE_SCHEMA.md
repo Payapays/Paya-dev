@@ -1,4 +1,4 @@
-# InsightArena Contract Storage Schema
+# PayaStakes Contract Storage Schema
 
 This document is the authoritative reference for the on-chain data model. Read it before touching `storage_types.rs`. Any change that affects a `DataKey` variant or an existing struct field is a **breaking change** — see the [Breaking Changes](#breaking-changes) section.
 

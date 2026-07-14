@@ -25,8 +25,8 @@ import Link from "next/link";
 // --- FAQ DATA ---
 const faqs = [
   {
-    question: "What is InsightArena?",
-    answer: "InsightArena is a decentralized prediction market platform where users can trade on the outcomes of real-world events. Built on high-performance blockchain technology, it ensures transparency, security, and fairness for all participants."
+    question: "What is PayaStakes?",
+    answer: "PayaStakes is a decentralized prediction market platform where users can trade on the outcomes of real-world events. Built on high-performance blockchain technology, it ensures transparency, security, and fairness for all participants."
   },
   {
     question: "How do I connect my wallet?",
@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     question: "Is there a fee for trading?",
-    answer: "InsightArena charges a minimal platform fee on successful predictions to maintain the ecosystem. Detailed fee structures can be found in our 'Fees & Rewards' section."
+    answer: "PayaStakes charges a minimal platform fee on successful predictions to maintain the ecosystem. Detailed fee structures can be found in our 'Fees & Rewards' section."
   },
   {
     question: "How are market outcomes resolved?",
@@ -48,8 +48,8 @@ const docSections = [
     id: "getting-started",
     title: "Getting Started",
     icon: <BookOpen className="w-6 h-6 text-[#4FD1C5]" />,
-    description: "Learn the basics of InsightArena and how to navigate the platform.",
-    content: "Welcome to InsightArena! Our platform allows you to leverage your knowledge to predict future events. To get started, you'll need a compatible blockchain wallet and some native tokens for gas fees and staking."
+    description: "Learn the basics of PayaStakes and how to navigate the platform.",
+    content: "Welcome to PayaStakes! Our platform allows you to leverage your knowledge to predict future events. To get started, you'll need a compatible blockchain wallet and some native tokens for gas fees and staking."
   },
   {
     id: "wallet-connection",
@@ -80,7 +80,7 @@ const docSections = [
     icon: <FileText className="w-6 h-6 text-purple-500" />,
     description: "Technical details about our on-chain logic and security audits.",
     content: "Our platform is powered by Soroban smart contracts on the Stellar network. All code is open-source and has undergone rigorous security auditing by industry leading firms.",
-    link: "https://github.com/Arena1X/InsightArena/tree/main/contract",
+    link: "https://github.com/Payapays/Paya-dev/tree/main/contract",
     external: true
   },
   {
@@ -89,7 +89,7 @@ const docSections = [
     icon: <PlayCircle className="w-6 h-6 text-red-500" />,
     description: "Visual walkthroughs of key features and platform use-cases.",
     content: "Prefer watching over reading? Our YouTube channel contains comprehensive guides covering everything from basic setup to advanced trading strategies.",
-    link: "https://youtube.com/InsightArena",
+    link: "https://youtube.com/PayaStakes",
     external: true
   }
 ];
@@ -116,7 +116,7 @@ export default function DocsPage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
-              InsightArena Documentation
+              PayaStakes Documentation
             </h1>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10">
               Everything you need to know about the world's most transparent prediction platform.
@@ -256,7 +256,7 @@ export default function DocsPage() {
             <h3 className="text-2xl font-bold mb-4">Open Source Code</h3>
             <p className="text-gray-400 mb-6">Our entire stack is public. Verify our security or contribute to the ecosystem.</p>
             <Link 
-              href="https://github.com/Arena1X/InsightArena" 
+              href="https://github.com/Payapays/Paya-dev" 
               target="_blank"
               className="inline-flex items-center text-[#4FD1C5] font-semibold hover:gap-2 transition-all"
             >
@@ -268,7 +268,7 @@ export default function DocsPage() {
             <h3 className="text-2xl font-bold mb-4">Video Masterclass</h3>
             <p className="text-gray-400 mb-6">Watch our developers guide you through the protocol's advanced features.</p>
             <Link 
-              href="https://youtube.com/InsightArena" 
+              href="https://youtube.com/PayaStakes" 
               target="_blank"
               className="inline-flex items-center text-[#4FD1C5] font-semibold hover:gap-2 transition-all"
             >

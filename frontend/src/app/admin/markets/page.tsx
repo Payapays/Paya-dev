@@ -14,7 +14,7 @@ const marketGroups = [
       },
       {
         id: "MKT-147",
-        title: "Will the InsightArena DAO approve the fee change?",
+        title: "Will the PayaStakes DAO approve the fee change?",
         volume: "260.8K",
         status: "Active",
       },

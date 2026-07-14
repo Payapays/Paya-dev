@@ -4,9 +4,9 @@
 //! Covers: season creation, finalization, reward distribution, leaderboard
 //! accumulation, idempotency guards, and cross-season data integrity.
 
-use insightarena_contract::storage_types::RewardPayout;
-use insightarena_contract::{
-    CreateMarketParams, InsightArenaContract, InsightArenaContractClient, InsightArenaError,
+use payastakes_contract::storage_types::RewardPayout;
+use payastakes_contract::{
+    CreateMarketParams, PayaStakesContract, PayaStakesContractClient, PayaStakesError,
     LeaderboardEntry,
 };
 use soroban_sdk::testutils::{Address as _, Ledger as _};
@@ -21,9 +21,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -191,7 +191,7 @@ fn default_market_params(env: &Env) -> CreateMarketParams {
 #[allow(clippy::too_many_arguments)]
 fn settle_winning_market(
     env: &Env,
-    client: &InsightArenaContractClient<'_>,
+    client: &PayaStakesContractClient<'_>,
     xlm_token: &Address,
     oracle: &Address,
     winner: &Address,
@@ -273,7 +273,7 @@ fn test_create_season_invalid_time() {
     approve_reward_pool(&env, &xlm_token, &admin, &client.address, 50_000_000);
 
     let result = client.try_create_season(&admin, &200, &100, &50_000_000);
-    assert_eq!(result, Err(Ok(InsightArenaError::InvalidTimeRange)));
+    assert_eq!(result, Err(Ok(PayaStakesError::InvalidTimeRange)));
 }
 
 #[test]
@@ -289,7 +289,7 @@ fn test_finalize_season_too_early() {
 
     env.ledger().set_timestamp(99);
     let result = client.try_finalize_season(&admin, &season_id);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonNotActive)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonNotActive)));
 }
 
 #[test]
@@ -353,7 +353,7 @@ fn test_finalize_season_idempotent() {
     client.finalize_season(&admin, &season_id);
 
     let result = client.try_finalize_season(&admin, &season_id);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonAlreadyFinalized)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonAlreadyFinalized)));
 }
 
 #[test]
@@ -723,7 +723,7 @@ fn test_reset_season_points_fails_for_non_admin() {
 
     let non_admin = Address::generate(&env);
     let result = client.try_reset_season_points(&non_admin, &season_id);
-    assert_eq!(result, Err(Ok(InsightArenaError::Unauthorized)));
+    assert_eq!(result, Err(Ok(PayaStakesError::Unauthorized)));
 }
 
 #[test]
@@ -741,7 +741,7 @@ fn test_reset_season_points_fails_for_finalized_season() {
     client.finalize_season(&admin, &season_id);
 
     let result = client.try_reset_season_points(&admin, &season_id);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonAlreadyFinalized)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonAlreadyFinalized)));
 }
 
 #[test]
@@ -755,7 +755,7 @@ fn test_create_season_overlapping_active_season_fails() {
     client.create_season(&admin, &100, &200, &100_000_000);
 
     let result = client.try_create_season(&admin, &150, &250, &100_000_000);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonOverlap)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonOverlap)));
 }
 
 #[test]
@@ -800,7 +800,7 @@ fn test_create_season_overlapping_finalized_season_succeeds() {
     assert_eq!(season1_id, 1);
 
     let result = client.try_create_season(&admin, &150, &250, &100_000_000);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonOverlap)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonOverlap)));
 
     client.update_leaderboard(&admin, &season1_id, &sample_entries(&env));
 
@@ -823,7 +823,7 @@ fn test_season_overlap_ends_inside_fails() {
     client.create_season(&admin, &100, &200, &100_000_000);
 
     let result = client.try_create_season(&admin, &50, &150, &100_000_000);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonOverlap)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonOverlap)));
 }
 
 #[test]
@@ -838,7 +838,7 @@ fn test_season_overlap_fully_contained_fails() {
     client.create_season(&admin, &100, &200, &100_000_000);
 
     let result = client.try_create_season(&admin, &120, &180, &100_000_000);
-    assert_eq!(result, Err(Ok(InsightArenaError::SeasonOverlap)));
+    assert_eq!(result, Err(Ok(PayaStakesError::SeasonOverlap)));
 }
 
 #[test]

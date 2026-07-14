@@ -1,4 +1,4 @@
-use insightarena_contract::*;
+use payastakes_contract::*;
 use soroban_sdk::testutils::Address as _;
 use soroban_sdk::testutils::Ledger as _;
 use soroban_sdk::token::StellarAssetClient;
@@ -10,9 +10,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -21,9 +21,9 @@ fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address) {
     (client, xlm_token)
 }
 
-fn deploy_with_oracle(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy_with_oracle(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -61,7 +61,7 @@ fn get_market_stats_not_found() {
     env.mock_all_auths();
     let (client, _) = deploy(&env);
     let result = client.try_get_market_stats(&99);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -112,7 +112,7 @@ fn get_outcome_distribution_not_found() {
     env.mock_all_auths();
     let (client, _) = deploy(&env);
     let result = client.try_get_outcome_distribution(&99);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -191,7 +191,7 @@ fn get_user_stats_not_found() {
     let (client, _) = deploy(&env);
     let unknown = Address::generate(&env);
     let result = client.try_get_user_stats(&unknown);
-    assert!(matches!(result, Err(Ok(InsightArenaError::UserNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::UserNotFound))));
 }
 
 #[test]

@@ -1,11 +1,11 @@
-use insightarena_contract::config;
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::config;
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 use soroban_sdk::testutils::{Address as _, MockAuth, MockAuthInvoke};
 use soroban_sdk::{Address, Env, IntoVal};
 
-fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
-    let id = env.register(InsightArenaContract, ());
-    InsightArenaContractClient::new(env, &id)
+fn deploy(env: &Env) -> PayaStakesContractClient<'_> {
+    let id = env.register(PayaStakesContract, ());
+    PayaStakesContractClient::new(env, &id)
 }
 
 fn register_token(env: &Env) -> Address {
@@ -35,7 +35,7 @@ fn ensure_not_paused_err_when_paused() {
     client.initialize(&admin, &oracle, &200_u32, &register_token(&env));
     client.set_paused(&true);
     let result = client.try_get_config();
-    assert!(matches!(result, Err(Ok(InsightArenaError::Paused))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Paused))));
 }
 
 #[test]
@@ -44,7 +44,7 @@ fn ensure_not_paused_not_initialized() {
     env.mock_all_auths();
     let client = deploy(&env);
     let result = client.try_get_config();
-    assert!(matches!(result, Err(Ok(InsightArenaError::NotInitialized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::NotInitialized))));
 }
 
 #[test]
@@ -71,7 +71,7 @@ fn test_config_update_validation() {
     client.initialize(&admin, &oracle, &200_u32, &register_token(&env));
 
     let result = client.try_update_protocol_fee(&10_001_u32);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidFee))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidFee))));
 
     let config = client.get_config();
     assert_eq!(config.protocol_fee_bps, 200);
@@ -92,7 +92,7 @@ fn test_pause_and_unpause_contract() {
 
     client.set_paused(&true);
     let result_paused = client.try_get_config();
-    assert!(matches!(result_paused, Err(Ok(InsightArenaError::Paused))));
+    assert!(matches!(result_paused, Err(Ok(PayaStakesError::Paused))));
 
     client.set_paused(&false);
     let result_after = client.try_get_config();

@@ -1,7 +1,7 @@
 use soroban_sdk::{Address, Env, Vec};
 
 use crate::config::{PERSISTENT_BUMP, PERSISTENT_THRESHOLD};
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::storage_types::{CreatorLeaderboardEntry, CreatorStats, DataKey};
 
 // ── Storage helpers ───────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ pub fn on_dispute_raised(env: &Env, creator: &Address) {
 
 // ── View ──────────────────────────────────────────────────────────────────────
 
-pub fn get_creator_stats(env: Env, creator: Address) -> Result<CreatorStats, InsightArenaError> {
+pub fn get_creator_stats(env: Env, creator: Address) -> Result<CreatorStats, PayaStakesError> {
     Ok(load_stats(&env, &creator))
 }
 
@@ -158,11 +158,11 @@ pub fn reset_creator_stats(
     env: &Env,
     admin: Address,
     creator: Address,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     admin.require_auth();
     let cfg = crate::config::get_config(env)?;
     if admin != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let mut stats = load_stats(env, &creator);

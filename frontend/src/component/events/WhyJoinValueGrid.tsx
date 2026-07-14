@@ -127,12 +127,12 @@ export default function WhyJoinValueGrid() {
     <section className="w-full py-12 sm:py-18 md:py-24">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-center text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-8 sm:mb-12">
-          Why Join InsightArena?
+          Why Join PayaStakes?
         </h2>
 
         <div
           className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"
-          aria-label="Why Join InsightArena value grid"
+          aria-label="Why Join PayaStakes value grid"
         >
           {CARDS.map((c) => (
             <Card

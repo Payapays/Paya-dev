@@ -1,11 +1,11 @@
-use insightarena_contract::errors::InsightArenaError;
-use insightarena_contract::market::CreateMarketParams;
-use insightarena_contract::storage_types::{DataKey, InviteCode};
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient};
+use payastakes_contract::errors::PayaStakesError;
+use payastakes_contract::market::CreateMarketParams;
+use payastakes_contract::storage_types::{DataKey, InviteCode};
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::{vec, Address, Env, String, Symbol, Vec};
 
-fn setup_test(env: &Env) -> (Address, Address, u64, InsightArenaContractClient<'_>) {
+fn setup_test(env: &Env) -> (Address, Address, u64, PayaStakesContractClient<'_>) {
     env.mock_all_auths();
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
@@ -14,8 +14,8 @@ fn setup_test(env: &Env) -> (Address, Address, u64, InsightArenaContractClient<'
         .register_stellar_asset_contract_v2(admin.clone())
         .address();
 
-    let contract_id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &contract_id);
+    let contract_id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &contract_id);
     client.initialize(&admin, &oracle, &200, &xlm_token);
 
     let params = CreateMarketParams {
@@ -66,7 +66,7 @@ fn test_generate_invite_code_unauthorized() {
     env.mock_all_auths();
 
     let result = client.try_generate_invite_code(&non_creator, &market_id, &10, &3600);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn test_generate_invite_code_invalid_uses() {
     let (creator, _, market_id, client) = setup_test(&env);
 
     let result = client.try_generate_invite_code(&creator, &market_id, &0, &3600);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -129,7 +129,7 @@ fn test_redeem_invite_code_invalid_code() {
     let result = client.try_redeem_invite_code(&invitee, &Symbol::new(&env, "deadbeef"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InvalidInviteCode))
+        Err(Ok(PayaStakesError::InvalidInviteCode))
     ));
 }
 
@@ -155,7 +155,7 @@ fn test_redeem_invite_code_deactivated() {
     let result = client.try_redeem_invite_code(&invitee, &code);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InvalidInviteCode))
+        Err(Ok(PayaStakesError::InvalidInviteCode))
     ));
 }
 
@@ -171,7 +171,7 @@ fn test_redeem_invite_code_expired() {
     let result = client.try_redeem_invite_code(&invitee, &code);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InviteCodeExpired))
+        Err(Ok(PayaStakesError::InviteCodeExpired))
     ));
 }
 
@@ -188,7 +188,7 @@ fn test_redeem_invite_code_max_used() {
     let result = client.try_redeem_invite_code(&invitee2, &code);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InviteCodeMaxUsed))
+        Err(Ok(PayaStakesError::InviteCodeMaxUsed))
     ));
 }
 
@@ -233,7 +233,7 @@ fn test_invite_code_expiration_blocks_redemption() {
     let result = client.try_redeem_invite_code(&invitee, &code);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InviteCodeExpired))
+        Err(Ok(PayaStakesError::InviteCodeExpired))
     ));
 }
 
@@ -256,7 +256,7 @@ fn test_invite_code_usage_limit_blocks_extra_redemptions() {
     let result = client.try_redeem_invite_code(&invitee3, &code);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::InviteCodeMaxUsed))
+        Err(Ok(PayaStakesError::InviteCodeMaxUsed))
     ));
 }
 
@@ -307,8 +307,8 @@ fn test_generate_invite_code_rejects_public_market() {
         .register_stellar_asset_contract_v2(admin.clone())
         .address();
 
-    let contract_id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(&env, &contract_id);
+    let contract_id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(&env, &contract_id);
     client.initialize(&admin, &oracle, &200, &xlm_token);
 
     // Create a PUBLIC market
@@ -328,7 +328,7 @@ fn test_generate_invite_code_rejects_public_market() {
     let market_id = client.create_market(&creator, &params);
 
     let result = client.try_generate_invite_code(&creator, &market_id, &10, &3600);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -342,8 +342,8 @@ fn test_generate_invite_code_succeeds_for_private_market() {
         .register_stellar_asset_contract_v2(admin.clone())
         .address();
 
-    let contract_id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(&env, &contract_id);
+    let contract_id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(&env, &contract_id);
     client.initialize(&admin, &oracle, &200, &xlm_token);
 
     // Create a PRIVATE market

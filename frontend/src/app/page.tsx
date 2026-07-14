@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>InsightArena | Decentralized Prediction Market</title>
+        <title>PayaStakes | Decentralized Prediction Market</title>
       </Head>
 
       <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-x-hidden">

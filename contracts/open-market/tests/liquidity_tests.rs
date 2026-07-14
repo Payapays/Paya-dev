@@ -9,9 +9,9 @@
 //! - Security tests (reentrancy, overflow, unauthorized access)
 //! - Edge cases (zero amounts, single outcome, pool depletion)
 
-use insightarena_contract::liquidity::*;
-use insightarena_contract::{
-    CreateMarketParams, InsightArenaContract, InsightArenaContractClient, InsightArenaError,
+use payastakes_contract::liquidity::*;
+use payastakes_contract::{
+    CreateMarketParams, PayaStakesContract, PayaStakesContractClient, PayaStakesError,
 };
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::token::{Client as TokenClient, StellarAssetClient};
@@ -25,9 +25,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> PayaStakesContractClient<'_> {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -57,22 +57,22 @@ fn test_calculate_swap_output_basic() {
 #[test]
 fn test_calculate_swap_output_zero_input_fails() {
     let result = calculate_swap_output(0, 1000, 1000, 30);
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 #[test]
 fn test_calculate_swap_output_zero_reserve_fails() {
     let result_in = calculate_swap_output(100, 0, 1000, 30);
-    assert_eq!(result_in, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result_in, Err(PayaStakesError::InvalidInput));
 
     let result_out = calculate_swap_output(100, 1000, 0, 30);
-    assert_eq!(result_out, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result_out, Err(PayaStakesError::InvalidInput));
 }
 
 #[test]
 fn test_calculate_swap_output_overflow_protection() {
     let result = calculate_swap_output(i128::MAX, 1000, 1000, 30);
-    assert_eq!(result, Err(InsightArenaError::Overflow));
+    assert_eq!(result, Err(PayaStakesError::Overflow));
 }
 
 #[test]
@@ -147,19 +147,19 @@ fn test_calculate_lp_tokens_proportional_minting() {
 #[test]
 fn test_calculate_lp_tokens_zero_deposit_fails() {
     let result = calculate_lp_tokens(0, 1000, 1000);
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 #[test]
 fn test_calculate_lp_tokens_negative_deposit_fails() {
     let result = calculate_lp_tokens(-100, 1000, 1000);
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 #[test]
 fn test_calculate_lp_tokens_overflow_protection() {
     let result = calculate_lp_tokens(i128::MAX, 1000, 1000);
-    assert_eq!(result, Err(InsightArenaError::Overflow));
+    assert_eq!(result, Err(PayaStakesError::Overflow));
 }
 
 // ── Price Discovery Tests ─────────────────────────────────────────────────────
@@ -252,7 +252,7 @@ fn test_fee_accumulation_over_time() {
 fn test_overflow_protection_large_amounts() {
     // Test with amounts near i128::MAX
     let result = calculate_swap_output(i128::MAX / 2, i128::MAX / 2, 1000, 30);
-    assert_eq!(result, Err(InsightArenaError::Overflow));
+    assert_eq!(result, Err(PayaStakesError::Overflow));
 }
 
 #[test]
@@ -264,17 +264,17 @@ fn test_minimum_liquidity_enforcement() {
 #[test]
 fn test_negative_amount_protection() {
     let result = calculate_swap_output(-100, 1000, 1000, 30);
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 #[test]
 fn test_division_by_zero_protection() {
     // Zero reserves should fail
     let result1 = calculate_swap_output(100, 0, 1000, 30);
-    assert_eq!(result1, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result1, Err(PayaStakesError::InvalidInput));
 
     let result2 = calculate_swap_output(100, 1000, 0, 30);
-    assert_eq!(result2, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result2, Err(PayaStakesError::InvalidInput));
 }
 
 // ── Edge Cases ────────────────────────────────────────────────────────────────
@@ -672,9 +672,9 @@ fn test_get_swap_history_empty_before_any_swaps() {
 
 // ── collect_lp_fees Tests (Issue #561) ───────────────────────────────────────
 
-fn deploy_with_token(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy_with_token(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = {
@@ -806,7 +806,7 @@ fn test_collect_lp_fees_fails_when_no_fees_earned() {
     client.add_liquidity(&provider, &market_id, &liquidity);
 
     let result = client.try_collect_lp_fees(&provider, &market_id);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -863,7 +863,7 @@ fn test_collect_lp_fees_clears_and_idempotent() {
 
     // (e) Double-collect returns 0 (idempotent).
     let result = client.try_collect_lp_fees(&provider, &market_id);
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]
@@ -1047,7 +1047,7 @@ fn test_swap_outcome_fails_below_min_amount_out() {
         &swap_amount,
         &1_000_000_000_i128,
     );
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidInput))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidInput))));
 }
 
 #[test]

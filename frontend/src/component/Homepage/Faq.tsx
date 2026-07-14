@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
-    question: "What is InsightArena?",
+    question: "What is PayaStakes?",
     answer:
-      "InsightArena is a decentralized prediction market built on the Stellar network using Soroban smart contracts. It allows users to stake XLM on real-world outcomes.",
+      "PayaStakes is a decentralized prediction market built on the Stellar network using Soroban smart contracts. It allows users to stake XLM on real-world outcomes.",
   },
   {
     question: "How do I start predicting?",
@@ -23,7 +23,7 @@ const faqs = [
   {
     question: "Is my native XLM safe?",
     answer:
-      "Yes. Funds are locked in a non-custodial smart contract escrow. InsightArena administrators cannot access your funds.",
+      "Yes. Funds are locked in a non-custodial smart contract escrow. PayaStakes administrators cannot access your funds.",
   },
   {
     question: "Who resolves the market outcomes?",

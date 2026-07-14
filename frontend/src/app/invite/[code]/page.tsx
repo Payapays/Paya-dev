@@ -11,29 +11,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `Event Invite — ${code}`;
   const description =
-    "You've been invited to join a creator prediction event on InsightArena. Preview the event and join using your Stellar wallet.";
+    "You've been invited to join a creator prediction event on PayaStakes. Preview the event and join using your Stellar wallet.";
 
   return {
     title,
     description,
     openGraph: {
       type: "website",
-      title: `Join the Event | InsightArena`,
+      title: `Join the Event | PayaStakes`,
       description,
       images: [
         {
           url: "/og-image.png",
           width: 1200,
           height: 630,
-          alt: "InsightArena Event Invite",
+          alt: "PayaStakes Event Invite",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Join the Event | InsightArena`,
+      title: `Join the Event | PayaStakes`,
       description,
-      creator: "@InsightArena",
+      creator: "@PayaStakes",
       images: ["/twitter-image.png"],
     },
   };

@@ -1,6 +1,6 @@
-# Contributing to InsightArena Backend
+# Contributing to PayaStakes Backend
 
-NestJS backend for the InsightArena prediction market platform.
+NestJS backend for the PayaStakes prediction market platform.
 
 ---
 
@@ -34,7 +34,7 @@ cp .env.example .env
 
 | Variable              | Description                                                                                                                                                                                                                                                             | Example                                              |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `DATABASE_URL`        | PostgreSQL connection string                                                                                                                                                                                                                                            | `postgresql://user:pass@localhost:5432/insightarena` |
+| `DATABASE_URL`        | PostgreSQL connection string                                                                                                                                                                                                                                            | `postgresql://user:pass@localhost:5432/payastakes` |
 | `JWT_SECRET`          | Secret for signing JWTs — min 32 chars                                                                                                                                                                                                                                  | any long random string                               |
 | `JWT_EXPIRES_IN`      | JWT expiry duration                                                                                                                                                                                                                                                     | `7d`                                                 |
 | `STELLAR_NETWORK`     | Stellar network to connect to                                                                                                                                                                                                                                           | `testnet` or `mainnet`                               |
@@ -203,7 +203,7 @@ pnpm run lint && pnpm run test && pnpm run build
 Ensure `DATABASE_URL` in `.env` is correct:
 
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/insightarena
+DATABASE_URL=postgresql://user:password@localhost:5432/payastakes
 ```
 
 ### TypeORM "Data type Object not supported" error

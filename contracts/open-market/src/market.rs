@@ -1,7 +1,7 @@
 use soroban_sdk::{contracttype, symbol_short, Address, Env, String, Symbol, Vec};
 
 use crate::config::{self, PERSISTENT_BUMP, PERSISTENT_THRESHOLD};
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::escrow;
 use crate::reputation;
 use crate::storage_types::{
@@ -106,12 +106,12 @@ fn append_market_to_category_index(env: &Env, category: &Symbol, market_id: u64)
     save_category_index(env, category, &market_ids);
 }
 
-fn require_admin(env: &Env, admin: &Address) -> Result<(), InsightArenaError> {
+fn require_admin(env: &Env, admin: &Address) -> Result<(), PayaStakesError> {
     admin.require_auth();
 
     let cfg = config::get_config(env)?;
     if admin != &cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     Ok(())
@@ -126,9 +126,9 @@ fn load_market_count(env: &Env) -> u64 {
         .unwrap_or(0u64)
 }
 
-fn next_market_id(env: &Env) -> Result<u64, InsightArenaError> {
+fn next_market_id(env: &Env) -> Result<u64, PayaStakesError> {
     let count = load_market_count(env);
-    let next = count.checked_add(1).ok_or(InsightArenaError::Overflow)?;
+    let next = count.checked_add(1).ok_or(PayaStakesError::Overflow)?;
     env.storage().persistent().set(&DataKey::MarketCount, &next);
     bump_counter(env);
     Ok(next)
@@ -166,16 +166,16 @@ pub fn emit_market_resolved(env: &Env, market_id: u64, resolved_outcome: Symbol)
 
 /// Calculate price of outcome A in terms of outcome B.
 /// Returns price with 6 decimal precision (multiplied by 1_000_000).
-pub fn calculate_price(reserve_a: i128, reserve_b: i128) -> Result<i128, InsightArenaError> {
+pub fn calculate_price(reserve_a: i128, reserve_b: i128) -> Result<i128, PayaStakesError> {
     if reserve_a <= 0 || reserve_b <= 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let price = reserve_b
         .checked_mul(1_000_000)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(reserve_a)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     Ok(price)
 }
@@ -216,7 +216,7 @@ pub fn create_market(
     env: &Env,
     creator: Address,
     params: CreateMarketParams,
-) -> Result<u64, InsightArenaError> {
+) -> Result<u64, PayaStakesError> {
     // ── Guard 1: platform not paused ─────────────────────────────────────────
     config::ensure_not_paused(env)?;
 
@@ -226,39 +226,39 @@ pub fn create_market(
     // ── Guard 3: end_time must be in the future ───────────────────────────────
     let now = env.ledger().timestamp();
     if params.end_time <= now {
-        return Err(InsightArenaError::InvalidTimeRange);
+        return Err(PayaStakesError::InvalidTimeRange);
     }
 
     // ── Guard 4: resolution_time must be at or after end_time ────────────────
     if params.resolution_time < params.end_time {
-        return Err(InsightArenaError::InvalidTimeRange);
+        return Err(PayaStakesError::InvalidTimeRange);
     }
 
     // ── Guard 5: at least two outcomes required ───────────────────────────────
     if params.outcomes.len() < 2 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
     if has_duplicate_outcomes(&params.outcomes) {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     // ── Load config for fee and stake floor checks ────────────────────────────
     let cfg = config::get_config(env)?;
     if !load_categories(env).contains(params.category.clone()) {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     // ── Guard 6: creator fee must not exceed the platform cap ─────────────────
     if params.creator_fee_bps > cfg.max_creator_fee_bps {
-        return Err(InsightArenaError::InvalidFee);
+        return Err(PayaStakesError::InvalidFee);
     }
 
     // ── Guard 7: stake bounds ─────────────────────────────────────────────────
     if params.min_stake < cfg.min_stake_xlm {
-        return Err(InsightArenaError::StakeTooLow);
+        return Err(PayaStakesError::StakeTooLow);
     }
     if params.max_stake < params.min_stake {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     // ── Atomically assign a new market ID ────────────────────────────────────
@@ -299,12 +299,12 @@ pub fn create_market(
 }
 
 /// Load a single market by ID. Returns `MarketNotFound` if absent.
-pub fn get_market(env: &Env, market_id: u64) -> Result<Market, InsightArenaError> {
+pub fn get_market(env: &Env, market_id: u64) -> Result<Market, PayaStakesError> {
     let market = env
         .storage()
         .persistent()
         .get(&DataKey::Market(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
     bump_market(env, market_id);
     Ok(market)
 }
@@ -356,7 +356,7 @@ pub fn list_markets(env: &Env, start: u64, limit: u32) -> Vec<Market> {
     result
 }
 
-pub fn add_category(env: &Env, admin: Address, category: Symbol) -> Result<(), InsightArenaError> {
+pub fn add_category(env: &Env, admin: Address, category: Symbol) -> Result<(), PayaStakesError> {
     require_admin(env, &admin)?;
 
     let mut categories = load_categories(env);
@@ -372,7 +372,7 @@ pub fn remove_category(
     env: &Env,
     admin: Address,
     category: Symbol,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     require_admin(env, &admin)?;
 
     let mut categories = load_categories(env);
@@ -436,26 +436,26 @@ pub fn get_markets_by_category(env: &Env, category: Symbol, start: u64, limit: u
 ///
 /// On success the market's `is_closed` flag is set to `true`, the record is
 /// re-saved to persistent storage, and a `MarketClosed` event is emitted.
-pub fn close_market(env: &Env, caller: Address, market_id: u64) -> Result<(), InsightArenaError> {
+pub fn close_market(env: &Env, caller: Address, market_id: u64) -> Result<(), PayaStakesError> {
     // ── Guard 1: market must exist ────────────────────────────────────────────
     let mut market = get_market(env, market_id)?;
 
     // ── Guard 2: end_time must have passed ────────────────────────────────────
     let now = env.ledger().timestamp();
     if now < market.end_time {
-        return Err(InsightArenaError::MarketStillOpen);
+        return Err(PayaStakesError::MarketStillOpen);
     }
 
     // ── Guard 3: market must not already be resolved ──────────────────────────
     if market.is_resolved {
-        return Err(InsightArenaError::MarketAlreadyResolved);
+        return Err(PayaStakesError::MarketAlreadyResolved);
     }
 
     // ── Guard 4: caller must be creator, admin, or oracle ──────────────────────
     caller.require_auth();
     let cfg = config::get_config(env)?;
     if caller != market.creator && caller != cfg.admin && caller != cfg.oracle_address {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     // ── Update status and persist ─────────────────────────────────────────────
@@ -480,7 +480,7 @@ pub fn update_creator_fee(
     creator: Address,
     market_id: u64,
     new_creator_fee_bps: u32,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     config::ensure_not_paused(env)?;
 
     creator.require_auth();
@@ -488,25 +488,25 @@ pub fn update_creator_fee(
     let mut market = get_market(env, market_id)?;
 
     if market.creator != creator {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     if market.is_resolved {
-        return Err(InsightArenaError::MarketAlreadyResolved);
+        return Err(PayaStakesError::MarketAlreadyResolved);
     }
 
     if market.is_cancelled {
-        return Err(InsightArenaError::MarketAlreadyCancelled);
+        return Err(PayaStakesError::MarketAlreadyCancelled);
     }
 
     let now = env.ledger().timestamp();
     if now >= market.end_time {
-        return Err(InsightArenaError::MarketExpired);
+        return Err(PayaStakesError::MarketExpired);
     }
 
     let cfg = config::get_config(env)?;
     if new_creator_fee_bps > cfg.max_creator_fee_bps {
-        return Err(InsightArenaError::InvalidFee);
+        return Err(PayaStakesError::InvalidFee);
     }
 
     market.creator_fee_bps = new_creator_fee_bps;
@@ -538,7 +538,7 @@ pub fn extend_market_end_time(
     creator: Address,
     market_id: u64,
     new_end_time: u64,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     config::ensure_not_paused(env)?;
 
     creator.require_auth();
@@ -546,28 +546,28 @@ pub fn extend_market_end_time(
     let mut market = get_market(env, market_id)?;
 
     if market.creator != creator {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     if market.is_resolved {
-        return Err(InsightArenaError::MarketAlreadyResolved);
+        return Err(PayaStakesError::MarketAlreadyResolved);
     }
 
     if market.is_cancelled {
-        return Err(InsightArenaError::MarketAlreadyCancelled);
+        return Err(PayaStakesError::MarketAlreadyCancelled);
     }
 
     if market.is_closed {
-        return Err(InsightArenaError::MarketAlreadyClosed);
+        return Err(PayaStakesError::MarketAlreadyClosed);
     }
 
     let now = env.ledger().timestamp();
     if now >= market.end_time {
-        return Err(InsightArenaError::MarketExpired);
+        return Err(PayaStakesError::MarketExpired);
     }
 
     if new_end_time <= market.end_time {
-        return Err(InsightArenaError::InvalidTimeRange);
+        return Err(PayaStakesError::InvalidTimeRange);
     }
 
     market.end_time = new_end_time;
@@ -600,25 +600,25 @@ pub fn extend_market_end_time(
 /// - All entries in `PredictorList(market_id)` are iterated; for each, the
 ///   corresponding `Prediction` record is loaded and `escrow::refund` is called.
 /// - A `MarketCancelled` event is emitted.
-pub fn cancel_market(env: &Env, caller: Address, market_id: u64) -> Result<(), InsightArenaError> {
+pub fn cancel_market(env: &Env, caller: Address, market_id: u64) -> Result<(), PayaStakesError> {
     // ── Guard 1: market must exist ────────────────────────────────────────────
     let mut market = get_market(env, market_id)?;
 
     // ── Guard 2: market must not already be resolved ──────────────────────────
     if market.is_resolved {
-        return Err(InsightArenaError::MarketAlreadyResolved);
+        return Err(PayaStakesError::MarketAlreadyResolved);
     }
 
     // ── Guard 3: market must not already be cancelled ─────────────────────────
     if market.is_cancelled {
-        return Err(InsightArenaError::MarketAlreadyCancelled);
+        return Err(PayaStakesError::MarketAlreadyCancelled);
     }
 
     // ── Guard 4: only the platform admin may cancel ───────────────────────────
     caller.require_auth();
     let cfg = config::get_config(env)?;
     if caller != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     // ── Mark market as cancelled and persist ──────────────────────────────────
@@ -673,27 +673,27 @@ pub fn resolve_market(
     oracle: Address,
     market_id: u64,
     resolved_outcome: Symbol,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     oracle.require_auth();
 
     let cfg = config::get_config(&env)?;
     if oracle != cfg.oracle_address {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let mut market = get_market(&env, market_id)?;
 
     let now = env.ledger().timestamp();
     if now < market.resolution_time {
-        return Err(InsightArenaError::MarketStillOpen);
+        return Err(PayaStakesError::MarketStillOpen);
     }
 
     if market.is_resolved {
-        return Err(InsightArenaError::MarketAlreadyResolved);
+        return Err(PayaStakesError::MarketAlreadyResolved);
     }
 
     if !market.outcome_options.contains(resolved_outcome.clone()) {
-        return Err(InsightArenaError::InvalidOutcome);
+        return Err(PayaStakesError::InvalidOutcome);
     }
 
     market.is_resolved = true;
@@ -740,7 +740,7 @@ pub fn resolve_market(
 pub fn update_oracle_from_governance(
     env: &Env,
     new_oracle: Address,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let mut cfg = config::get_config(env)?;
     cfg.oracle_address = new_oracle;
     env.storage().persistent().set(&DataKey::Config, &cfg);
@@ -763,20 +763,20 @@ pub fn create_conditional_market(
     parent_market_id: u64,
     required_outcome: Symbol,
     params: CreateMarketParams,
-) -> Result<u64, InsightArenaError> {
+) -> Result<u64, PayaStakesError> {
     validate_conditional_params(env, parent_market_id, &required_outcome, &params)?;
 
     let parent_depth = calculate_conditional_depth(env, parent_market_id);
     let depth = parent_depth
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     if depth > MAX_CONDITIONAL_DEPTH {
-        return Err(InsightArenaError::ConditionalDepthExceeded);
+        return Err(PayaStakesError::ConditionalDepthExceeded);
     }
 
     let new_market_id = load_market_count(env)
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     validate_no_circular_dependency(env, new_market_id, parent_market_id)?;
 
     let market_id = create_market(env, creator, params)?;
@@ -846,12 +846,12 @@ pub fn get_conditional_markets(env: &Env, parent_market_id: u64) -> Vec<Conditio
 /// Get the direct parent market for a conditional market.
 ///
 /// Returns `MarketNotFound` when `market_id` is not a conditional market.
-pub fn get_parent_market(env: &Env, market_id: u64) -> Result<Market, InsightArenaError> {
+pub fn get_parent_market(env: &Env, market_id: u64) -> Result<Market, PayaStakesError> {
     let parent_market_id: u64 = env
         .storage()
         .persistent()
         .get(&DataKey::ConditionalParent(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     get_market(env, parent_market_id)
 }
@@ -863,9 +863,9 @@ pub fn get_parent_market(env: &Env, market_id: u64) -> Result<Market, InsightAre
 pub fn get_conditional_chain(
     env: &Env,
     market_id: u64,
-) -> Result<crate::storage_types::ConditionalChain, InsightArenaError> {
+) -> Result<crate::storage_types::ConditionalChain, PayaStakesError> {
     if !env.storage().persistent().has(&DataKey::Market(market_id)) {
-        return Err(InsightArenaError::MarketNotFound);
+        return Err(PayaStakesError::MarketNotFound);
     }
 
     if let Some(cached) = env
@@ -923,30 +923,30 @@ fn validate_conditional_params(
     parent_market_id: u64,
     required_outcome: &Symbol,
     params: &CreateMarketParams,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let parent_market: Market = env
         .storage()
         .persistent()
         .get(&DataKey::Market(parent_market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     if parent_market.is_resolved || parent_market.is_cancelled {
-        return Err(InsightArenaError::MarketExpired);
+        return Err(PayaStakesError::MarketExpired);
     }
 
     if !parent_market
         .outcome_options
         .contains(required_outcome.clone())
     {
-        return Err(InsightArenaError::InvalidOutcome);
+        return Err(PayaStakesError::InvalidOutcome);
     }
 
     if params.end_time <= parent_market.resolution_time {
-        return Err(InsightArenaError::InvalidTimeRange);
+        return Err(PayaStakesError::InvalidTimeRange);
     }
 
     if params.resolution_time <= params.end_time {
-        return Err(InsightArenaError::InvalidTimeRange);
+        return Err(PayaStakesError::InvalidTimeRange);
     }
 
     Ok(())
@@ -956,12 +956,12 @@ fn validate_no_circular_dependency(
     env: &Env,
     new_market_id: u64,
     parent_market_id: u64,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let mut current = parent_market_id;
 
     loop {
         if current == new_market_id {
-            return Err(InsightArenaError::ConditionalDepthExceeded);
+            return Err(PayaStakesError::ConditionalDepthExceeded);
         }
 
         if let Some(next_parent) = env
@@ -987,13 +987,13 @@ fn emit_conditional_deactivated(env: &Env, market_id: u64) {
 /// non-matching outcome. Sets `is_activated = false`, marks the underlying
 /// `Market` as `is_cancelled = true`, refunds any stakes already placed, and
 /// emits a deactivation event.
-pub fn deactivate_conditional_market(env: &Env, market_id: u64) -> Result<(), InsightArenaError> {
+pub fn deactivate_conditional_market(env: &Env, market_id: u64) -> Result<(), PayaStakesError> {
     // Load and update the ConditionalMarket record.
     let mut conditional: ConditionalMarket = env
         .storage()
         .persistent()
         .get(&DataKey::ConditionalMarket(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     conditional.is_activated = false;
 
@@ -1030,12 +1030,12 @@ pub fn deactivate_conditional_market(env: &Env, market_id: u64) -> Result<(), In
     Ok(())
 }
 
-fn activate_conditional_market(env: &Env, market_id: u64) -> Result<(), InsightArenaError> {
+fn activate_conditional_market(env: &Env, market_id: u64) -> Result<(), PayaStakesError> {
     let mut conditional: ConditionalMarket = env
         .storage()
         .persistent()
         .get(&DataKey::ConditionalMarket(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     let now = env.ledger().timestamp();
     conditional.activate(now);
@@ -1102,12 +1102,12 @@ fn accumulate_outcome_pools(env: &Env, market_id: u64) -> (Vec<Symbol>, Vec<i128
 }
 
 /// Aggregate stats for a single market from stored market + prediction data.
-pub fn get_market_stats(env: Env, market_id: u64) -> Result<MarketStats, InsightArenaError> {
+pub fn get_market_stats(env: Env, market_id: u64) -> Result<MarketStats, PayaStakesError> {
     let market: Market = env
         .storage()
         .persistent()
         .get(&DataKey::Market(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     let (outcome_symbols, outcome_pools) = accumulate_outcome_pools(&env, market_id);
 
@@ -1133,9 +1133,9 @@ pub fn get_market_stats(env: Env, market_id: u64) -> Result<MarketStats, Insight
 pub fn get_outcome_distribution(
     env: Env,
     market_id: u64,
-) -> Result<Vec<(Symbol, i128)>, InsightArenaError> {
+) -> Result<Vec<(Symbol, i128)>, PayaStakesError> {
     if !env.storage().persistent().has(&DataKey::Market(market_id)) {
-        return Err(InsightArenaError::MarketNotFound);
+        return Err(PayaStakesError::MarketNotFound);
     }
 
     let (mut outcome_symbols, mut outcome_pools) = accumulate_outcome_pools(&env, market_id);
@@ -1172,11 +1172,11 @@ pub fn get_outcome_distribution(
 }
 
 /// Return the stored `UserProfile` for a given address.
-pub fn get_user_stats(env: Env, user: Address) -> Result<UserProfile, InsightArenaError> {
+pub fn get_user_stats(env: Env, user: Address) -> Result<UserProfile, PayaStakesError> {
     env.storage()
         .persistent()
         .get(&DataKey::User(user))
-        .ok_or(InsightArenaError::UserNotFound)
+        .ok_or(PayaStakesError::UserNotFound)
 }
 
 /// Return platform-wide aggregated stats using cached counters (O(1)).

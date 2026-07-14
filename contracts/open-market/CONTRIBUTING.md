@@ -1,6 +1,6 @@
-# Contributing to InsightArena Contract
+# Contributing to PayaStakes Contract
 
-Soroban smart contract for the InsightArena prediction market platform, built with Rust and the [Soroban SDK](https://soroban.stellar.org) on the Stellar network.
+Soroban smart contract for the PayaStakes prediction market platform, built with Rust and the [Soroban SDK](https://soroban.stellar.org) on the Stellar network.
 
 ---
 
@@ -200,7 +200,7 @@ make build
 
 # Deploy to testnet (adapt identity and network to your setup)
 soroban contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/insightarena_contract.wasm \
+  --wasm target/wasm32-unknown-unknown/release/payastakes_contract.wasm \
   --source <your-identity> \
   --network testnet
 ```

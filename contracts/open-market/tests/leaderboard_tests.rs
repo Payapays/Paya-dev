@@ -1,12 +1,12 @@
-use insightarena_contract::{
-    InsightArenaContract, InsightArenaContractClient, InsightArenaError, LeaderboardEntry,
+use payastakes_contract::{
+    PayaStakesContract, PayaStakesContractClient, PayaStakesError, LeaderboardEntry,
 };
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::{vec, Address, Env};
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let token_admin = Address::generate(env);
@@ -20,7 +20,7 @@ fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address) {
 
 fn fund_reward_pool(
     env: &Env,
-    client: &InsightArenaContractClient<'_>,
+    client: &PayaStakesContractClient<'_>,
     admin: &Address,
     xlm_token: &Address,
     reward_pool: i128,
@@ -112,7 +112,7 @@ fn test_get_leaderboard_not_found() {
     env.mock_all_auths();
     let (client, _, _) = deploy(&env);
     let result = client.try_get_leaderboard(&99);
-    assert!(matches!(result, Err(Ok(InsightArenaError::SeasonNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::SeasonNotFound))));
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_update_leaderboard_unauthorized() {
     let (client, _, _) = deploy(&env);
     let stranger = Address::generate(&env);
     let result = client.try_update_leaderboard(&stranger, &1, &vec![&env]);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -132,7 +132,7 @@ fn test_update_leaderboard_when_paused() {
     let (client, admin, _) = deploy(&env);
     client.set_paused(&true);
     let result = client.try_update_leaderboard(&admin, &1, &vec![&env]);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Paused))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Paused))));
 }
 
 #[test]

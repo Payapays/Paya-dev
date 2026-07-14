@@ -1,6 +1,6 @@
-# Contributing to InsightArena
+# Contributing to PayaStakes
 
-Thanks for your interest in contributing. This guide covers everything you need to get started with the **backend** (NestJS) and **contract** (Soroban/Rust) and how to make sure your changes pass CI before opening a PR.
+Thanks for your interest in contributing. This guide covers everything you need to get started with the **backend** (NestJS), **frontend** (Next.js), and **contracts** (Soroban/Rust) tiers of PayaStakes, plus how to make sure your changes pass CI before opening a PR.
 
 ---
 
@@ -20,10 +20,10 @@ Thanks for your interest in contributing. This guide covers everything you need 
 ## Project Structure
 
 ```
-InsightArena/
-├── backend/     # NestJS API (Node.js 20, pnpm)
-├── contract/    # Soroban smart contracts (Rust)
-└── frontend/    # Next.js web app
+PayaStakes/
+├── backend/      # NestJS API (Node.js 20, pnpm) — infrastructure tier
+├── contracts/    # Soroban smart contracts (Rust) — protocol tier
+└── frontend/     # Next.js web app — consumer product tier
 ```
 
 CI is scoped — backend workflows only trigger on changes under `backend/`, contract workflows trigger on all PRs.
@@ -39,7 +39,7 @@ CI is scoped — backend workflows only trigger on changes under `backend/`, con
 - PostgreSQL (local or Docker)
 - Make
 
-### Contract
+### Contracts
 
 - Rust (stable) — `curl https://sh.rustup.rs -sSf | sh`
 - wasm32 target — `rustup target add wasm32-unknown-unknown`
@@ -72,10 +72,10 @@ Swagger docs at `http://localhost:3000/api/v1/docs`
 
 ---
 
-## Contract Setup
+## Contracts Setup
 
 ```bash
-cd contract
+cd contracts
 
 # 1. Build the WASM artifact
 make build
@@ -112,10 +112,10 @@ make build   # TypeScript compilation
 
 All three must pass. If `make ci` exits with no errors, your PR will pass the backend workflow.
 
-### Contract
+### Contracts
 
 ```bash
-cd contract
+cd contracts
 
 make test    # cargo test --lib
 make build   # cargo build --target wasm32-unknown-unknown --release

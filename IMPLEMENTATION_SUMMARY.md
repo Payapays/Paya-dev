@@ -3,7 +3,7 @@
 ## Branch Created
 **Branch Name:** `fix/backend-bugs-and-features`
 
-**Remote URL:** https://github.com/Immex171/InsightArena/pull/new/fix/backend-bugs-and-features
+**Remote URL:** https://github.com/Immex171/PayaStakes/pull/new/fix/backend-bugs-and-features
 
 ---
 
@@ -167,7 +167,7 @@ fix: Backend bug fixes and feature enhancements
 
 ## Next Steps
 
-1. Create Pull Request at: https://github.com/Immex171/InsightArena/pull/new/fix/backend-bugs-and-features
+1. Create Pull Request at: https://github.com/Immex171/PayaStakes/pull/new/fix/backend-bugs-and-features
 2. Use the content from `PR_DESCRIPTION.md` for the PR description
 3. Link issues in the PR:
    - Closes #1076
@@ -282,4 +282,4 @@ For questions or issues with this implementation, please contact the development
 
 **Implementation Date:** 2026-06-25  
 **Developer:** Kiro AI Assistant  
-**Project:** InsightArena Backend
+**Project:** PayaStakes Backend

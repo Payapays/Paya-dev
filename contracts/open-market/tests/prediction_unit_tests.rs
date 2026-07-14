@@ -2,8 +2,8 @@ use soroban_sdk::testutils::Address as _;
 use soroban_sdk::token::StellarAssetClient;
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
-use insightarena_contract::market::CreateMarketParams;
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::market::CreateMarketParams;
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 
 // ── Test helpers ──────────────────────────────────────────────────────────
 
@@ -14,9 +14,9 @@ fn register_token(env: &Env) -> Address {
 }
 
 /// Deploy and initialise the contract; return client + xlm_token address.
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -70,7 +70,7 @@ fn submit_prediction_stores_correct_data() {
 
     // Verify prediction stored correctly
     let pred = env.as_contract(&client.address, || {
-        use insightarena_contract::storage_types::{DataKey, Prediction};
+        use payastakes_contract::storage_types::{DataKey, Prediction};
         env.storage()
             .persistent()
             .get::<DataKey, Prediction>(&DataKey::Prediction(market_id, predictor.clone()))
@@ -122,7 +122,7 @@ fn submit_prediction_private_market_rejects_unlisted() {
 
     let result =
         client.try_submit_prediction(&predictor, &market_id, &symbol_short!("yes"), &stake);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
     assert!(!client.has_predicted(&market_id, &predictor));
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "paya-stakes-backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "PayaStakes infrastructure tier — Stellar-native stakes, escrow, and payout orchestration",
   "author": "",
   "private": true,
   "license": "UNLICENSED",

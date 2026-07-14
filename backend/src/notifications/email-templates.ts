@@ -39,13 +39,13 @@ export function renderEmailTemplate(
   switch (type) {
     case 'event_created':
       return {
-        subject: `Your event "${context.eventTitle ?? 'New Event'}" is live on InsightArena`,
+        subject: `Your event "${context.eventTitle ?? 'New Event'}" is live on PayaStakes`,
         html: wrapHtml(
           'Event Created',
           `<p>Your creator event <strong>${escapeHtml(context.eventTitle ?? 'New Event')}</strong> has been created successfully.</p>
            <p>Share your invite code <strong>${escapeHtml(context.inviteCode ?? '')}</strong> with participants to get started.</p>`,
         ),
-        text: `Your event "${context.eventTitle ?? 'New Event'}" is live on InsightArena. Invite code: ${context.inviteCode ?? ''}`,
+        text: `Your event "${context.eventTitle ?? 'New Event'}" is live on PayaStakes. Invite code: ${context.inviteCode ?? ''}`,
       };
 
     case 'match_result_available':
@@ -65,7 +65,7 @@ export function renderEmailTemplate(
         html: wrapHtml(
           'You Won!',
           `<p>Congratulations! You are a verified winner of <strong>${escapeHtml(context.eventTitle ?? 'the event')}</strong>.</p>
-           <p>Log in to InsightArena to claim your payout.</p>`,
+           <p>Log in to PayaStakes to claim your payout.</p>`,
         ),
         text: `Congratulations! You won the event "${context.eventTitle ?? 'the event'}".`,
       };
@@ -98,25 +98,25 @@ export function renderEmailTemplate(
         .join('\n');
       return {
         subject:
-          `Your ${freq} InsightArena digest — ${context.digestPeriod ?? ''}`.trimEnd(),
+          `Your ${freq} PayaStakes digest — ${context.digestPeriod ?? ''}`.trimEnd(),
         html: wrapHtml(
           `${freq} Activity Digest`,
-          `<p>Here's a summary of your recent activity on InsightArena:</p>
+          `<p>Here's a summary of your recent activity on PayaStakes:</p>
            ${itemsHtml}
            <p style="margin-top:16px;color:#475569;font-size:13px;">You have ${items.length} unread notification${items.length === 1 ? '' : 's'}.</p>`,
         ),
-        text: `Your ${freq.toLowerCase()} InsightArena digest:\n\n${itemsText}`,
+        text: `Your ${freq.toLowerCase()} PayaStakes digest:\n\n${itemsText}`,
       };
     }
 
     default:
       return {
-        subject: 'InsightArena Notification',
+        subject: 'PayaStakes Notification',
         html: wrapHtml(
           'Notification',
-          '<p>You have a new notification from InsightArena.</p>',
+          '<p>You have a new notification from PayaStakes.</p>',
         ),
-        text: 'You have a new notification from InsightArena.',
+        text: 'You have a new notification from PayaStakes.',
       };
   }
 }
@@ -126,9 +126,9 @@ function wrapHtml(title: string, body: string): string {
     <body><div class="container">
       <div class="header"><h1 style="margin:0;font-size:20px;">${escapeHtml(title)}</h1></div>
       <div class="content">${body}
-        <a class="cta" href="https://insightarena.app">View on InsightArena</a>
+        <a class="cta" href="https://payastakes.app">View on PayaStakes</a>
       </div>
-      <div class="footer">You received this email because of your InsightArena notification preferences.</div>
+      <div class="footer">You received this email because of your PayaStakes notification preferences.</div>
     </div></body></html>`;
 }
 

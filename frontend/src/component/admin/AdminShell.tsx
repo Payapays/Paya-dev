@@ -24,7 +24,7 @@ export default function AdminShell({ children }: AdminShellProps) {
         <aside className="w-full border-b border-white/10 bg-slate-950/95 lg:w-[280px] lg:border-r lg:border-b-0">
           <div className="border-b border-white/10 px-6 py-6">
             <p className="text-sm uppercase tracking-[0.35em] text-gray-400">Admin Console</p>
-            <h2 className="mt-4 text-2xl font-semibold text-white">InsightArena</h2>
+            <h2 className="mt-4 text-2xl font-semibold text-white">PayaStakes</h2>
             <p className="mt-2 text-sm text-gray-400">Platform operations and support tools.</p>
           </div>
 

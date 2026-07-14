@@ -1,8 +1,8 @@
 #![cfg(test)]
 
-use insightarena_contract::market::CreateMarketParams;
-use insightarena_contract::storage_types::{ConditionalMarket, DataKey, Market};
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::market::CreateMarketParams;
+use payastakes_contract::storage_types::{ConditionalMarket, DataKey, Market};
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 use soroban_sdk::testutils::{Address as _, Ledger};
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
@@ -12,9 +12,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> PayaStakesContractClient<'_> {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -23,9 +23,9 @@ fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
     client
 }
 
-fn deploy_with_admin_and_oracle(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy_with_admin_and_oracle(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -34,7 +34,7 @@ fn deploy_with_admin_and_oracle(env: &Env) -> (InsightArenaContractClient<'_>, A
     (client, admin, oracle)
 }
 
-fn read_market(env: &Env, client: &InsightArenaContractClient<'_>, market_id: u64) -> Market {
+fn read_market(env: &Env, client: &PayaStakesContractClient<'_>, market_id: u64) -> Market {
     let contract_id = client.address.clone();
     env.as_contract(&contract_id, || {
         env.storage()
@@ -46,7 +46,7 @@ fn read_market(env: &Env, client: &InsightArenaContractClient<'_>, market_id: u6
 
 fn read_conditional(
     env: &Env,
-    client: &InsightArenaContractClient<'_>,
+    client: &PayaStakesContractClient<'_>,
     market_id: u64,
 ) -> ConditionalMarket {
     let contract_id = client.address.clone();
@@ -62,9 +62,9 @@ fn set_timestamp(env: &Env, timestamp: u64) {
     env.ledger().with_mut(|l| l.timestamp = timestamp);
 }
 
-fn deploy_with_oracle(env: &Env) -> (InsightArenaContractClient<'_>, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy_with_oracle(env: &Env) -> (PayaStakesContractClient<'_>, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -92,7 +92,7 @@ fn default_params(env: &Env) -> CreateMarketParams {
 
 fn conditional_params(
     env: &Env,
-    client: &InsightArenaContractClient<'_>,
+    client: &PayaStakesContractClient<'_>,
     parent_market_id: u64,
 ) -> CreateMarketParams {
     let parent = read_market(env, client, parent_market_id);
@@ -127,7 +127,7 @@ fn test_create_conditional_market_invalid_parent_fails() {
         &default_params(&env),
     );
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -164,7 +164,7 @@ fn test_create_conditional_market_resolved_parent_fails() {
         &conditional_params(&env, &client, parent_id),
     );
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketExpired))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketExpired))));
 }
 
 #[test]
@@ -187,7 +187,7 @@ fn test_create_conditional_market_invalid_outcome_fails() {
         &conditional_params(&env, &client, parent_id),
     );
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidOutcome))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidOutcome))));
 }
 
 #[test]
@@ -205,7 +205,7 @@ fn test_validate_conditional_params_invalid_outcome_fails() {
         &conditional_params(&env, &client, parent_id),
     );
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::InvalidOutcome))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::InvalidOutcome))));
 }
 
 #[test]
@@ -226,7 +226,7 @@ fn test_validate_conditional_params_resolved_parent_fails() {
         &conditional_params(&env, &client, parent_id),
     );
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketExpired))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketExpired))));
 }
 
 #[test]
@@ -273,7 +273,7 @@ fn test_no_circular_dependency_direct_loop_rejected() {
 
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::ConditionalDepthExceeded))
+        Err(Ok(PayaStakesError::ConditionalDepthExceeded))
     ));
 }
 
@@ -313,7 +313,7 @@ fn test_no_circular_dependency_indirect_loop_rejected() {
 
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::ConditionalDepthExceeded))
+        Err(Ok(PayaStakesError::ConditionalDepthExceeded))
     ));
 }
 
@@ -379,7 +379,7 @@ fn test_create_conditional_market_exceeds_depth_fails() {
 
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::ConditionalDepthExceeded))
+        Err(Ok(PayaStakesError::ConditionalDepthExceeded))
     ));
 }
 
@@ -624,7 +624,7 @@ fn test_get_parent_market_fails_for_non_conditional_market() {
     let root_id = client.create_market(&creator, &default_params(&env));
     let result = client.try_get_parent_market(&root_id);
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -634,7 +634,7 @@ fn test_get_parent_market_fails_for_unknown_market() {
     let client = deploy(&env);
 
     let result = client.try_get_parent_market(&404_u64);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 // ── Issue #556: get_conditional_chain ───────────────────────────────────────
@@ -746,7 +746,7 @@ fn test_check_conditional_activation_invalid_market_fails() {
     set_timestamp(&env, 10_000);
     let result = client.try_resolve_market(&oracle, &999_u64, &symbol_short!("yes"));
 
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -1002,7 +1002,7 @@ fn test_conditional_chain_for_unknown_market_fails() {
     let client = deploy(&env);
 
     let result = client.try_get_conditional_chain(&808_u64);
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -1457,7 +1457,7 @@ fn test_activation_resolving_parent_twice_fails() {
     let result = client.try_resolve_market(&oracle, &parent, &symbol_short!("yes"));
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketAlreadyResolved))
+        Err(Ok(PayaStakesError::MarketAlreadyResolved))
     ));
 }
 
@@ -1696,7 +1696,7 @@ fn test_edge_invalid_parent_id_large_value() {
         &symbol_short!("yes"),
         &default_params(&env),
     );
-    assert!(matches!(result, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -1724,7 +1724,7 @@ fn test_edge_max_depth_boundary() {
     );
     assert!(matches!(
         fail,
-        Err(Ok(InsightArenaError::ConditionalDepthExceeded))
+        Err(Ok(PayaStakesError::ConditionalDepthExceeded))
     ));
 }
 
@@ -1739,7 +1739,7 @@ fn test_security_unauthorized_resolve_parent_fails() {
     let parent = client.create_market(&creator, &default_params(&env));
     set_timestamp(&env, 30_000);
     let res = client.try_resolve_market(&attacker_oracle, &parent, &symbol_short!("yes"));
-    assert!(matches!(res, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(res, Err(Ok(PayaStakesError::Unauthorized))));
 }
 
 #[test]
@@ -1749,7 +1749,7 @@ fn test_security_get_parent_unknown_id_not_found() {
     let client = deploy(&env);
 
     let res = client.try_get_parent_market(&77_777_u64);
-    assert!(matches!(res, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(res, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 #[test]
@@ -1759,7 +1759,7 @@ fn test_security_conditional_chain_unknown_id_not_found() {
     let client = deploy(&env);
 
     let res = client.try_get_conditional_chain(&88_888_u64);
-    assert!(matches!(res, Err(Ok(InsightArenaError::MarketNotFound))));
+    assert!(matches!(res, Err(Ok(PayaStakesError::MarketNotFound))));
 }
 
 // ── Deactivation tests ────────────────────────────────────────────────────────
@@ -1867,7 +1867,7 @@ fn test_deactivated_market_rejects_new_predictions() {
         &10_000_000_i128,
     );
     assert!(
-        matches!(result, Err(Ok(InsightArenaError::MarketAlreadyCancelled))),
+        matches!(result, Err(Ok(PayaStakesError::MarketAlreadyCancelled))),
         "prediction on deactivated market should fail with MarketAlreadyCancelled"
     );
 }
@@ -1959,7 +1959,7 @@ fn test_create_conditional_market_depth_limit_enforced() {
     );
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::ConditionalDepthExceeded))
+        Err(Ok(PayaStakesError::ConditionalDepthExceeded))
     ));
 }
 

@@ -31,7 +31,7 @@ export default function ApiDocumentationPage() {
               Developer API
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              InsightArena API Documentation
+              PayaStakes API Documentation
             </h1>
             <p className="max-w-3xl text-base text-[#9aa4bc] sm:text-lg">
               Integrate markets, leaderboards, and events into your own apps.
@@ -47,7 +47,7 @@ export default function ApiDocumentationPage() {
                 all REST endpoints.
               </p>
               <pre className="overflow-x-auto rounded-xl border border-white/10 bg-[#0b1220] p-4 text-sm text-white">
-                <code>{`https://api.insightarena.com/v1`}</code>
+                <code>{`https://api.payastakes.com/v1`}</code>
               </pre>
             </Section>
 
@@ -126,10 +126,10 @@ export default function ApiDocumentationPage() {
               </p>
               <pre className="overflow-x-auto rounded-xl border border-white/10 bg-[#0b1220] p-4 text-sm text-white">
                 <code>{`# List events
-curl -s https://api.insightarena.com/v1/events | jq
+curl -s https://api.payastakes.com/v1/events | jq
 
 # Create an order (authenticated)
-curl -s https://api.insightarena.com/v1/markets/123/orders \\
+curl -s https://api.payastakes.com/v1/markets/123/orders \\
   -H "Authorization: Bearer <token>" \\
   -H "Content-Type: application/json" \\
   -d '{"side":"YES","amount":"25"}'`}</code>

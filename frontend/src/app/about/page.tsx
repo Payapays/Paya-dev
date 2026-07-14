@@ -21,7 +21,7 @@ export default function AboutPage() {
     { label: "Telegram", href: "#" },
     { label: "Twitter", href: "#" },
     { label: "Discord", href: "#" },
-    { label: "GitHub", href: "https://github.com/Arena1X/InsightArena" },
+    { label: "GitHub", href: "https://github.com/Payapays/Paya-dev" },
   ];
 
   const stack = [
@@ -71,7 +71,7 @@ export default function AboutPage() {
             About
           </p>
           <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-            InsightArena
+            PayaStakes
           </h1>
           <p className="mt-4 max-w-3xl text-base text-[#94a3b8] sm:text-lg">
             The premier decentralized prediction market on Stellar. We build a

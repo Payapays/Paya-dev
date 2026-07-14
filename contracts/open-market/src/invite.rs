@@ -1,5 +1,5 @@
 use crate::config;
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::market;
 use crate::storage_types::{DataKey, InviteCode};
 
@@ -21,21 +21,21 @@ pub fn generate_invite_code(
     market_id: u64,
     max_uses: u32,
     expires_in_seconds: u64,
-) -> Result<Symbol, InsightArenaError> {
+) -> Result<Symbol, PayaStakesError> {
     creator.require_auth();
 
     // 1. Fetch market and validate creator
     let market = market::get_market(&env, market_id)?;
     if market.creator != creator {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
     if market.is_public {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     // 2. Validate usage constraints
     if max_uses < 1 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     // 3. Generate collision-resistant 8-character code
@@ -93,7 +93,7 @@ pub fn redeem_invite_code(
     env: Env,
     invitee: Address,
     code: Symbol,
-) -> Result<u64, InsightArenaError> {
+) -> Result<u64, PayaStakesError> {
     invitee.require_auth();
 
     let invite_key = DataKey::InviteCode(code.clone());
@@ -101,19 +101,19 @@ pub fn redeem_invite_code(
         .storage()
         .persistent()
         .get(&invite_key)
-        .ok_or(InsightArenaError::InvalidInviteCode)?;
+        .ok_or(PayaStakesError::InvalidInviteCode)?;
 
     if !invite.is_active {
-        return Err(InsightArenaError::InvalidInviteCode);
+        return Err(PayaStakesError::InvalidInviteCode);
     }
 
     let current_time = env.ledger().timestamp();
     if current_time >= invite.expires_at {
-        return Err(InsightArenaError::InviteCodeExpired);
+        return Err(PayaStakesError::InviteCodeExpired);
     }
 
     if invite.current_uses >= invite.max_uses {
-        return Err(InsightArenaError::InviteCodeMaxUsed);
+        return Err(PayaStakesError::InviteCodeMaxUsed);
     }
 
     let allowlist_key = DataKey::MarketAllowlist(invite.market_id);
@@ -131,7 +131,7 @@ pub fn redeem_invite_code(
     invite.current_uses = invite
         .current_uses
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     env.storage().persistent().set(&invite_key, &invite);
     config::extend_invite_ttl(&env, &code);
     config::extend_market_ttl(&env, invite.market_id);
@@ -165,7 +165,7 @@ pub fn revoke_invite_code(
     env: Env,
     creator: Address,
     code: Symbol,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     creator.require_auth();
 
     let invite_key = DataKey::InviteCode(code.clone());
@@ -173,10 +173,10 @@ pub fn revoke_invite_code(
         .storage()
         .persistent()
         .get(&invite_key)
-        .ok_or(InsightArenaError::InvalidInviteCode)?;
+        .ok_or(PayaStakesError::InvalidInviteCode)?;
 
     if invite.creator != creator {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     invite.is_active = false;

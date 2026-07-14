@@ -24,8 +24,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('InsightArena API')
-    .setDescription('The InsightArena Platform API description')
+    .setTitle('PayaStakes API')
+    .setDescription('The PayaStakes Platform API description')
     .setVersion('1.0')
     .addBearerAuth()
     .addApiKey(

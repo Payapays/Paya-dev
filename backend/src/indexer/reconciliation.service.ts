@@ -120,7 +120,7 @@ export class ReconciliationService {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          id: 'insightarena-reconciliation',
+          id: 'payastakes-reconciliation',
           method: 'getEvents',
           params: {
             startLedger: fromLedger,
@@ -213,7 +213,7 @@ export class ReconciliationService {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          id: 'insightarena-reconciliation-head',
+          id: 'payastakes-reconciliation-head',
           method: 'getEvents',
           params: {
             startLedger: 1,

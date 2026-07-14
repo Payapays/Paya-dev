@@ -51,7 +51,7 @@ function Brand() {
       </span>
       <div className="min-w-0">
         <p className="truncate text-base font-semibold tracking-tight">
-          InsightArena
+          PayaStakes
         </p>
         <p className="text-xs text-gray-400">Prediction Markets</p>
       </div>

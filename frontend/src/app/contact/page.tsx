@@ -22,8 +22,8 @@ const INITIAL: FormState = { name: "", email: "", subject: "", category: "Techni
 
 const SOCIAL_LINKS = [
   { label: "Telegram", href: "https://t.me/+hR9dZKau8f84YTk0", icon: MessageSquare },
-  { label: "Twitter", href: "https://twitter.com/InsightArena", icon: Twitter },
-  { label: "GitHub", href: "https://github.com/Arena1X", icon: Github },
+  { label: "Twitter", href: "https://twitter.com/PayaStakes", icon: Twitter },
+  { label: "GitHub", href: "https://github.com/Payapays", icon: Github },
 ];
 
 export default function ContactPage() {

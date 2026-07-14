@@ -49,7 +49,7 @@ export default function TransparentGrid() {
             Transparent by Design
           </h2>
           <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-            Trust in mathematics and code. Every action on InsightArena is
+            Trust in mathematics and code. Every action on PayaStakes is
             publicly verifiable, completely transparent, and executed by
             immutable smart contracts on the Stellar network.
           </p>

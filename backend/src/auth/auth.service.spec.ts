@@ -69,7 +69,7 @@ describe('AuthService', () => {
     const two = service.generateChallenge(address);
 
     expect(one).not.toEqual(two);
-    expect(one).toContain('InsightArena:nonce:');
+    expect(one).toContain('PayaStakes:nonce:');
     expect(two).toContain(address);
   });
 

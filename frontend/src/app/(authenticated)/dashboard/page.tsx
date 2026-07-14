@@ -37,7 +37,7 @@ type RecentActivity = {
   badge: string;
 };
 
-const FALLBACK_DASHBOARD_SEED = "insightarena-dashboard-guest";
+const FALLBACK_DASHBOARD_SEED = "payastakes-dashboard-guest";
 
 const ACTIVE_MARKET_TITLES = [
   "Will XLM close above $0.25 this week?",

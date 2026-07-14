@@ -1,6 +1,8 @@
-# InsightArena — Frontend
+# PayaStakes — Frontend
 
-Next.js web application for the InsightArena decentralized prediction market platform. Built with React 19, Tailwind CSS, and Framer Motion.
+Next.js web application — the consumer product tier of PayaStakes. Surfaces the underlying Stellar stakes protocol as tournaments, private leagues, friend-vs-friend wagers, and community pools. Users sign transactions directly with their own Stellar wallet (Freighter / Stellar Wallets Kit) — the app never holds funds.
+
+Built with React 19, Tailwind CSS 4, and Framer Motion.
 
 ---
 

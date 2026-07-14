@@ -8,14 +8,14 @@ const initialHistory = [
     date: "2026-05-24",
     change: "Platform fee lowered",
     value: "2.5%",
-    updatedBy: "admin@insightarena",
+    updatedBy: "admin@payastakes",
   },
   {
     id: 2,
     date: "2026-04-15",
     change: "Creator fee raised",
     value: "1.2%",
-    updatedBy: "admin@insightarena",
+    updatedBy: "admin@payastakes",
   },
   {
     id: 3,

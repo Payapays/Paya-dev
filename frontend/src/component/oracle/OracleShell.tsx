@@ -24,7 +24,7 @@ export default function OracleShell({ children }: OracleShellProps) {
               AI Oracle
             </p>
             <h2 className="mt-4 text-2xl font-semibold text-white">
-              InsightArena
+              PayaStakes
             </h2>
             <p className="mt-2 text-sm text-gray-400">
               Submit match results for creator events.

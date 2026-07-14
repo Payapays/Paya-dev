@@ -8,7 +8,7 @@ const CONTRACT_MODULES = [
   {
     name: "Market",
     description:
-      "Manages prediction market creation, lifecycle, and outcome resolution. The core contract powering every market on InsightArena.",
+      "Manages prediction market creation, lifecycle, and outcome resolution. The core contract powering every market on PayaStakes.",
   },
   {
     name: "Prediction",
@@ -72,7 +72,7 @@ export default function ContractsPage() {
             Smart Contracts
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            InsightArena is built on Soroban — Stellar&rsquo;s smart-contract
+            PayaStakes is built on Soroban — Stellar&rsquo;s smart-contract
             platform. Every market, prediction, and payout is governed by
             open-source, auditable on-chain logic.
           </p>
@@ -143,7 +143,7 @@ export default function ContractsPage() {
           <div className="rounded-xl border border-white/10 bg-white/5 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <p className="text-gray-300 text-sm">
-                All InsightArena contracts are open-source and available for
+                All PayaStakes contracts are open-source and available for
                 public review on GitHub.
               </p>
               <p className="text-gray-500 text-xs">
@@ -165,7 +165,7 @@ export default function ContractsPage() {
             security disclosures are welcome.
           </p>
           <Link
-            href="https://github.com/Arena1X/InsightArena/tree/main/contract"
+            href="https://github.com/Payapays/Paya-dev/tree/main/contract"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-400 hover:bg-blue-500/20 transition-colors"

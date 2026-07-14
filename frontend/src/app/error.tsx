@@ -15,7 +15,7 @@ export default function RootErrorPage({
     <RouteErrorState
       error={error}
       reset={reset}
-      routeLabel="InsightArena"
+      routeLabel="PayaStakes"
       description="We couldn't load the experience right now. Please retry, or head back home while we reset things behind the scenes."
     />
   );

@@ -1,7 +1,7 @@
 use soroban_sdk::{symbol_short, Address, Env, Symbol, Vec};
 
 use crate::config::{self, PERSISTENT_BUMP, PERSISTENT_THRESHOLD};
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::escrow;
 use crate::market;
 use crate::season;
@@ -85,34 +85,34 @@ fn compute_payout_breakdown(
     loser_pool: i128,
     protocol_fee_bps: u32,
     creator_fee_bps: u32,
-) -> Result<(i128, i128, i128), InsightArenaError> {
+) -> Result<(i128, i128, i128), PayaStakesError> {
     let winner_share = stake_amount
         .checked_mul(loser_pool)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(winning_pool)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let gross_payout = stake_amount
         .checked_add(winner_share)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let protocol_fee = gross_payout
         .checked_mul(protocol_fee_bps as i128)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(10_000)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let creator_fee = gross_payout
         .checked_mul(creator_fee_bps as i128)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(10_000)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let net_payout = gross_payout
         .checked_sub(protocol_fee)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_sub(creator_fee)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     Ok((net_payout, protocol_fee, creator_fee))
 }
@@ -122,7 +122,7 @@ fn apply_winner_payout(
     predictor: &Address,
     net_payout: i128,
     stake_amount: i128,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     let user_key = DataKey::User(predictor.clone());
     let mut profile: UserProfile = env
         .storage()
@@ -133,12 +133,12 @@ fn apply_winner_payout(
     profile.total_winnings = profile
         .total_winnings
         .checked_add(net_payout)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     profile.correct_predictions = profile
         .correct_predictions
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let points = season::calculate_points(
         stake_amount,
@@ -148,7 +148,7 @@ fn apply_winner_payout(
     profile.season_points = profile
         .season_points
         .checked_add(points)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     env.storage().persistent().set(&user_key, &profile);
     bump_user(env, predictor);
@@ -182,7 +182,7 @@ pub fn submit_prediction(
     market_id: u64,
     chosen_outcome: Symbol,
     stake_amount: i128,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     // ── Guard 1: platform not paused ─────────────────────────────────────────
     config::ensure_not_paused(env)?;
 
@@ -191,23 +191,23 @@ pub fn submit_prediction(
         .storage()
         .persistent()
         .get(&DataKey::Market(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     // ── Guard 3a: market must not be cancelled ────────────────────────────────
     if market.is_cancelled {
-        return Err(InsightArenaError::MarketAlreadyCancelled);
+        return Err(PayaStakesError::MarketAlreadyCancelled);
     }
 
     // ── Guard 3b: market must not be expired ─────────────────────────────────
     let now = env.ledger().timestamp();
     if now >= market.end_time {
-        return Err(InsightArenaError::MarketExpired);
+        return Err(PayaStakesError::MarketExpired);
     }
 
     // ── Guard 4: chosen_outcome must be in outcome_options ───────────────────
     let outcome_valid = market.outcome_options.iter().any(|o| o == chosen_outcome);
     if !outcome_valid {
-        return Err(InsightArenaError::InvalidOutcome);
+        return Err(PayaStakesError::InvalidOutcome);
     }
 
     if !market.is_public {
@@ -218,7 +218,7 @@ pub fn submit_prediction(
             .unwrap_or_else(|| Vec::new(env));
 
         if !allowlist.iter().any(|entry| entry == predictor) {
-            return Err(InsightArenaError::Unauthorized);
+            return Err(PayaStakesError::Unauthorized);
         }
 
         env.storage().persistent().extend_ttl(
@@ -230,16 +230,16 @@ pub fn submit_prediction(
 
     // ── Guard 5 & 6: stake_amount must be within [min_stake, max_stake] ───────
     if stake_amount < market.min_stake {
-        return Err(InsightArenaError::StakeTooLow);
+        return Err(PayaStakesError::StakeTooLow);
     }
     if stake_amount > market.max_stake {
-        return Err(InsightArenaError::StakeTooHigh);
+        return Err(PayaStakesError::StakeTooHigh);
     }
 
     // ── Guard 7: user has not already predicted on this market ────────────────
     let prediction_key = DataKey::Prediction(market_id, predictor.clone());
     if env.storage().persistent().has(&prediction_key) {
-        return Err(InsightArenaError::AlreadyPredicted);
+        return Err(PayaStakesError::AlreadyPredicted);
     }
 
     // ── Lock stake in escrow (transfer XLM from predictor to contract) ────────
@@ -289,11 +289,11 @@ pub fn submit_prediction(
     market.total_pool = market
         .total_pool
         .checked_add(stake_amount)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     market.participant_count = market
         .participant_count
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     env.storage()
         .persistent()
         .set(&DataKey::Market(market_id), &market);
@@ -310,11 +310,11 @@ pub fn submit_prediction(
     profile.total_predictions = profile
         .total_predictions
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
     profile.total_staked = profile
         .total_staked
         .checked_add(stake_amount)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     env.storage().persistent().set(&user_key, &profile);
     bump_user(env, &predictor);
@@ -338,7 +338,7 @@ pub fn get_prediction(
     env: &Env,
     market_id: u64,
     predictor: Address,
-) -> Result<Prediction, InsightArenaError> {
+) -> Result<Prediction, PayaStakesError> {
     let key = DataKey::Prediction(market_id, predictor.clone());
 
     let prediction: Prediction = env
@@ -346,7 +346,7 @@ pub fn get_prediction(
         .persistent()
         .get(&key)
         .or_else(|| env.storage().temporary().get(&key))
-        .ok_or(InsightArenaError::PredictionNotFound)?;
+        .ok_or(PayaStakesError::PredictionNotFound)?;
 
     if env.storage().persistent().has(&key) {
         // Before claim, keep full market-lifetime TTL.
@@ -434,7 +434,7 @@ pub fn claim_payout(
     env: &Env,
     predictor: Address,
     market_id: u64,
-) -> Result<i128, InsightArenaError> {
+) -> Result<i128, PayaStakesError> {
     config::ensure_not_paused(env)?;
     predictor.require_auth();
 
@@ -442,16 +442,16 @@ pub fn claim_payout(
         .storage()
         .persistent()
         .get(&DataKey::Market(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     if !market.is_resolved {
-        return Err(InsightArenaError::MarketNotResolved);
+        return Err(PayaStakesError::MarketNotResolved);
     }
 
     let resolved_outcome = market
         .resolved_outcome
         .clone()
-        .ok_or(InsightArenaError::MarketNotResolved)?;
+        .ok_or(PayaStakesError::MarketNotResolved)?;
 
     let prediction_key = DataKey::Prediction(market_id, predictor.clone());
     let mut prediction: Prediction = env
@@ -459,14 +459,14 @@ pub fn claim_payout(
         .persistent()
         .get(&prediction_key)
         .or_else(|| env.storage().temporary().get(&prediction_key))
-        .ok_or(InsightArenaError::PredictionNotFound)?;
+        .ok_or(PayaStakesError::PredictionNotFound)?;
 
     if prediction.payout_claimed {
-        return Err(InsightArenaError::PayoutAlreadyClaimed);
+        return Err(PayaStakesError::PayoutAlreadyClaimed);
     }
 
     if prediction.chosen_outcome != resolved_outcome {
-        return Err(InsightArenaError::InvalidOutcome);
+        return Err(PayaStakesError::InvalidOutcome);
     }
 
     let predictors: Vec<Address> = env
@@ -487,51 +487,51 @@ pub fn claim_payout(
             if item.chosen_outcome == resolved_outcome {
                 winning_pool = winning_pool
                     .checked_add(item.stake_amount)
-                    .ok_or(InsightArenaError::Overflow)?;
+                    .ok_or(PayaStakesError::Overflow)?;
             }
         }
     }
 
     if winning_pool <= 0 {
-        return Err(InsightArenaError::EscrowEmpty);
+        return Err(PayaStakesError::EscrowEmpty);
     }
 
     let loser_pool = market
         .total_pool
         .checked_sub(winning_pool)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let winner_share = prediction
         .stake_amount
         .checked_mul(loser_pool)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(winning_pool)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let gross_payout = prediction
         .stake_amount
         .checked_add(winner_share)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let cfg = config::get_config(env)?;
 
     let protocol_fee = gross_payout
         .checked_mul(cfg.protocol_fee_bps as i128)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(10_000)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let creator_fee = gross_payout
         .checked_mul(market.creator_fee_bps as i128)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_div(10_000)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let net_payout = gross_payout
         .checked_sub(protocol_fee)
-        .ok_or(InsightArenaError::Overflow)?
+        .ok_or(PayaStakesError::Overflow)?
         .checked_sub(creator_fee)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     if net_payout > 0 {
         escrow::release_payout(env, &predictor, net_payout)?;
@@ -559,12 +559,12 @@ pub fn claim_payout(
     profile.total_winnings = profile
         .total_winnings
         .checked_add(net_payout)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     profile.correct_predictions = profile
         .correct_predictions
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let points = season::calculate_points(
         prediction.stake_amount,
@@ -574,7 +574,7 @@ pub fn claim_payout(
     profile.season_points = profile
         .season_points
         .checked_add(points)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     env.storage().persistent().set(&user_key, &profile);
     bump_user(env, &predictor);
@@ -600,29 +600,29 @@ pub fn batch_distribute_payouts(
     env: &Env,
     caller: Address,
     market_id: u64,
-) -> Result<u32, InsightArenaError> {
+) -> Result<u32, PayaStakesError> {
     config::ensure_not_paused(env)?;
     caller.require_auth();
 
     let cfg = config::get_config(env)?;
     if caller != cfg.admin && caller != cfg.oracle_address {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let market: Market = env
         .storage()
         .persistent()
         .get(&DataKey::Market(market_id))
-        .ok_or(InsightArenaError::MarketNotFound)?;
+        .ok_or(PayaStakesError::MarketNotFound)?;
 
     if !market.is_resolved {
-        return Err(InsightArenaError::MarketNotResolved);
+        return Err(PayaStakesError::MarketNotResolved);
     }
 
     let resolved_outcome = market
         .resolved_outcome
         .clone()
-        .ok_or(InsightArenaError::MarketNotResolved)?;
+        .ok_or(PayaStakesError::MarketNotResolved)?;
 
     let predictions = list_market_predictions(env, market_id);
     if predictions.is_empty() {
@@ -635,7 +635,7 @@ pub fn batch_distribute_payouts(
         if prediction.chosen_outcome == resolved_outcome {
             winning_pool = winning_pool
                 .checked_add(prediction.stake_amount)
-                .ok_or(InsightArenaError::Overflow)?;
+                .ok_or(PayaStakesError::Overflow)?;
         }
     }
 
@@ -647,7 +647,7 @@ pub fn batch_distribute_payouts(
     let loser_pool = market
         .total_pool
         .checked_sub(winning_pool)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     const MAX_BATCH_PAYOUTS: u32 = 25;
     let mut processed: u32 = 0;
@@ -666,7 +666,7 @@ pub fn batch_distribute_payouts(
             .storage()
             .persistent()
             .get(&prediction_key)
-            .ok_or(InsightArenaError::PredictionNotFound)?;
+            .ok_or(PayaStakesError::PredictionNotFound)?;
 
         if stored_prediction.payout_claimed {
             continue;
@@ -707,7 +707,7 @@ pub fn batch_distribute_payouts(
 
         processed = processed
             .checked_add(1)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
     }
 
     escrow::assert_escrow_solvent(env)?;

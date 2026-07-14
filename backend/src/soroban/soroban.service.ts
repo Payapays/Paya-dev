@@ -600,7 +600,7 @@ export class SorobanService {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          id: 'insightarena-events',
+          id: 'payastakes-events',
           method: 'getEvents',
           params: {
             startLedger: fromLedger,

@@ -1,4 +1,4 @@
-# InsightArena API Reference
+# PayaStakes API Reference
 
 Base URL: `http://localhost:3000/api/v1`
 
@@ -42,7 +42,7 @@ Success response:
 - `200 OK`
 ```json
 {
-  "challenge": "InsightArena:nonce:<timestamp>:<random>:<stellar_address>"
+  "challenge": "PayaStakes:nonce:<timestamp>:<random>:<stellar_address>"
 }
 ```
 
@@ -146,7 +146,7 @@ curl -X POST http://localhost:3000/api/v1/auth/verify-wallet \
   -H "Content-Type: application/json" \
   -d '{
     "stellar_address":"GBRPYHIL2CI3WHZDTOOQFC6EB4RRJC3XNRBF7XN",
-    "challenge":"InsightArena:nonce:...",
+    "challenge":"PayaStakes:nonce:...",
     "signature":"<hex-encoded-signature>"
   }'
 ```
@@ -3001,7 +3001,7 @@ When paging results, use `page` and `limit` consistently across endpoints.
 
 ## Authentication Flow
 
-InsightArena uses wallet-based JWT authentication with a 3-step wallet auth process.
+PayaStakes uses wallet-based JWT authentication with a 3-step wallet auth process.
 
 1. Generate challenge
    - `POST /auth/challenge`

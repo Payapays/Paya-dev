@@ -1,5 +1,5 @@
-use insightarena_contract::{
-    CreateMarketParams, InsightArenaContract, InsightArenaContractClient, InsightArenaError,
+use payastakes_contract::{
+    CreateMarketParams, PayaStakesContract, PayaStakesContractClient, PayaStakesError,
 };
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::token::{Client as TokenClient, StellarAssetClient};
@@ -11,9 +11,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -63,7 +63,7 @@ fn raise_dispute_fails_outside_window() {
     let result = client.try_raise_dispute(&disputer, &id, &10_000_000);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::DisputeWindowClosed))
+        Err(Ok(PayaStakesError::DisputeWindowClosed))
     ));
 }
 
@@ -189,7 +189,7 @@ fn test_get_dispute_fails_when_no_dispute() {
     let result = client.try_get_dispute(&id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::DisputeNotFound))
+        Err(Ok(PayaStakesError::DisputeNotFound))
     ));
 }
 
@@ -216,7 +216,7 @@ fn test_get_dispute_fails_after_resolution() {
     let result = client.try_get_dispute(&id);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::DisputeNotFound))
+        Err(Ok(PayaStakesError::DisputeNotFound))
     ));
 }
 
@@ -241,7 +241,7 @@ fn test_raise_dispute_on_unresolved_market_fails() {
     // 3. Assert it returns the MarketNotResolved error
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketNotResolved))
+        Err(Ok(PayaStakesError::MarketNotResolved))
     ));
 }
 
@@ -268,7 +268,7 @@ fn test_raise_dispute_on_closed_but_not_resolved_market_fails() {
     // 3. Assert it still rejects with MarketNotResolved
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::MarketNotResolved))
+        Err(Ok(PayaStakesError::MarketNotResolved))
     ));
 }
 
@@ -479,7 +479,7 @@ fn test_dispute_raise_one_second_past_boundary_fails() {
     let result = client.try_raise_dispute(&disputer, &id, &bond);
     assert!(matches!(
         result,
-        Err(Ok(InsightArenaError::DisputeWindowClosed))
+        Err(Ok(PayaStakesError::DisputeWindowClosed))
     ));
 }
 

@@ -395,7 +395,7 @@ const MOCK_EVENTS: CreatorEvent[] = [
   },
   {
     id: "event-004",
-    title: "Insight Arena Private Cup",
+    title: "Paya Stakes Private Cup",
     description:
       "An invite-only series of prediction battles with high participation demand.",
     creator: "GDR8N...1BWE",

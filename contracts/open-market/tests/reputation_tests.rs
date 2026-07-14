@@ -1,9 +1,9 @@
 #![cfg(test)]
 
-use insightarena_contract::market::CreateMarketParams;
-use insightarena_contract::reputation::*;
-use insightarena_contract::storage_types::CreatorStats;
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient};
+use payastakes_contract::market::CreateMarketParams;
+use payastakes_contract::reputation::*;
+use payastakes_contract::storage_types::CreatorStats;
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient};
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::token::{Client as TokenClient, StellarAssetClient};
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
@@ -14,9 +14,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address, Address, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address, Address, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);

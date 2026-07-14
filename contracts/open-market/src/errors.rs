@@ -2,7 +2,7 @@ use soroban_sdk::contracterror;
 
 #[contracterror]
 #[derive(Clone, Debug, Eq, PartialEq, Copy)]
-pub enum InsightArenaError {
+pub enum PayaStakesError {
     // ── Initialization ────────────────────────────────────────────────────────
     /// The contract `initialize` function has already been called.
     /// Raised to prevent re-initialization from overwriting global config.

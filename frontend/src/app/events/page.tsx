@@ -203,7 +203,7 @@ export default function EventsPage() {
                       Stellar Prediction Championship — Season 1
                     </h3>
                     <p className="text-sm text-gray-400 leading-relaxed">
-                      Compete against the sharpest predictors on InsightArena.
+                      Compete against the sharpest predictors on PayaStakes.
                       Stake XLM on real-world outcomes and climb the global
                       leaderboard to claim your share of the prize pool.
                     </p>

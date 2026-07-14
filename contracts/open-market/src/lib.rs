@@ -20,7 +20,7 @@ pub mod season;
 pub mod storage_types;
 
 pub use crate::config::Config;
-pub use crate::errors::InsightArenaError;
+pub use crate::errors::PayaStakesError;
 pub use crate::governance::{Proposal, ProposalType};
 pub use crate::liquidity::{calculate_liquidity_value, calculate_lp_tokens, calculate_swap_output};
 pub use crate::market::CreateMarketParams;
@@ -34,10 +34,10 @@ pub use crate::storage_types::{
 use soroban_sdk::{contract, contractimpl, Address, Env, Symbol, Vec};
 
 #[contract]
-pub struct InsightArenaContract;
+pub struct PayaStakesContract;
 
 #[contractimpl]
-impl InsightArenaContract {
+impl PayaStakesContract {
     // ── Initialisation ────────────────────────────────────────────────────────
 
     /// Set up the contract for the first time.
@@ -48,7 +48,7 @@ impl InsightArenaContract {
         oracle: Address,
         fee_bps: u32,
         xlm_token: Address,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         config::initialize(&env, admin, oracle, fee_bps, xlm_token)
     }
 
@@ -58,7 +58,7 @@ impl InsightArenaContract {
         oracle: Address,
         market_id: u64,
         resolved_outcome: Symbol,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::resolve_market(env, oracle, market_id, resolved_outcome)
     }
 
@@ -66,7 +66,7 @@ impl InsightArenaContract {
 
     /// Return the current global [`Config`]. TTL is extended on each call.
     /// Reverts with `Paused` when the contract is in emergency-halt mode.
-    pub fn get_config(env: Env) -> Result<Config, InsightArenaError> {
+    pub fn get_config(env: Env) -> Result<Config, PayaStakesError> {
         config::ensure_not_paused(&env)?;
         config::get_config(&env)
     }
@@ -74,17 +74,17 @@ impl InsightArenaContract {
     // ── Admin mutators ────────────────────────────────────────────────────────
 
     /// Update the platform fee rate. Caller must be the stored admin.
-    pub fn update_protocol_fee(env: Env, new_fee_bps: u32) -> Result<(), InsightArenaError> {
+    pub fn update_protocol_fee(env: Env, new_fee_bps: u32) -> Result<(), PayaStakesError> {
         config::update_protocol_fee(&env, new_fee_bps)
     }
 
     /// Pause or resume the contract. Caller must be the stored admin.
-    pub fn set_paused(env: Env, paused: bool) -> Result<(), InsightArenaError> {
+    pub fn set_paused(env: Env, paused: bool) -> Result<(), PayaStakesError> {
         config::set_paused(&env, paused)
     }
 
     /// Transfer admin rights to `new_admin`. Caller must be the current admin.
-    pub fn transfer_admin(env: Env, new_admin: Address) -> Result<(), InsightArenaError> {
+    pub fn transfer_admin(env: Env, new_admin: Address) -> Result<(), PayaStakesError> {
         config::transfer_admin(&env, new_admin)
     }
 
@@ -93,7 +93,7 @@ impl InsightArenaContract {
         env: Env,
         admin: Address,
         new_oracle: Address,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         config::update_oracle(&env, admin, new_oracle)
     }
 
@@ -104,7 +104,7 @@ impl InsightArenaContract {
         env: Env,
         creator: Address,
         params: CreateMarketParams,
-    ) -> Result<u64, InsightArenaError> {
+    ) -> Result<u64, PayaStakesError> {
         market::create_market(&env, creator, params)
     }
 
@@ -113,7 +113,7 @@ impl InsightArenaContract {
         env: Env,
         admin: Address,
         category: Symbol,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::add_category(&env, admin, category)
     }
 
@@ -122,7 +122,7 @@ impl InsightArenaContract {
         env: Env,
         admin: Address,
         category: Symbol,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::remove_category(&env, admin, category)
     }
 
@@ -142,7 +142,7 @@ impl InsightArenaContract {
     }
 
     /// Fetch a market by ID. Returns `MarketNotFound` if it does not exist.
-    pub fn get_market(env: Env, market_id: u64) -> Result<Market, InsightArenaError> {
+    pub fn get_market(env: Env, market_id: u64) -> Result<Market, PayaStakesError> {
         market::get_market(&env, market_id)
     }
 
@@ -161,7 +161,7 @@ impl InsightArenaContract {
         env: Env,
         caller: Address,
         market_id: u64,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::close_market(&env, caller, market_id)
     }
 
@@ -171,7 +171,7 @@ impl InsightArenaContract {
         creator: Address,
         market_id: u64,
         new_creator_fee_bps: u32,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::update_creator_fee(&env, creator, market_id, new_creator_fee_bps)
     }
 
@@ -181,7 +181,7 @@ impl InsightArenaContract {
         creator: Address,
         market_id: u64,
         new_end_time: u64,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::extend_market_end_time(&env, creator, market_id, new_end_time)
     }
 
@@ -190,7 +190,7 @@ impl InsightArenaContract {
         env: Env,
         caller: Address,
         market_id: u64,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         market::cancel_market(&env, caller, market_id)
     }
 
@@ -202,7 +202,7 @@ impl InsightArenaContract {
         parent_market_id: u64,
         required_outcome: Symbol,
         params: CreateMarketParams,
-    ) -> Result<u64, InsightArenaError> {
+    ) -> Result<u64, PayaStakesError> {
         market::create_conditional_market(&env, creator, parent_market_id, required_outcome, params)
     }
 
@@ -215,7 +215,7 @@ impl InsightArenaContract {
     }
 
     /// Get the direct parent market for a conditional market.
-    pub fn get_parent_market(env: Env, market_id: u64) -> Result<Market, InsightArenaError> {
+    pub fn get_parent_market(env: Env, market_id: u64) -> Result<Market, PayaStakesError> {
         market::get_parent_market(&env, market_id)
     }
 
@@ -223,7 +223,7 @@ impl InsightArenaContract {
     pub fn get_conditional_chain(
         env: Env,
         market_id: u64,
-    ) -> Result<crate::storage_types::ConditionalChain, InsightArenaError> {
+    ) -> Result<crate::storage_types::ConditionalChain, PayaStakesError> {
         market::get_conditional_chain(&env, market_id)
     }
 
@@ -238,7 +238,7 @@ impl InsightArenaContract {
     pub fn get_dispute(
         env: Env,
         market_id: u64,
-    ) -> Result<crate::storage_types::Dispute, InsightArenaError> {
+    ) -> Result<crate::storage_types::Dispute, PayaStakesError> {
         dispute::get_dispute(&env, market_id)
     }
 
@@ -248,7 +248,7 @@ impl InsightArenaContract {
         disputer: Address,
         market_id: u64,
         bond: i128,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         dispute::raise_dispute(env, disputer, market_id, bond)
     }
 
@@ -258,7 +258,7 @@ impl InsightArenaContract {
         admin: Address,
         market_id: u64,
         uphold: bool,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         dispute::resolve_dispute(env, admin, market_id, uphold)
     }
 
@@ -281,7 +281,7 @@ impl InsightArenaContract {
         market_id: u64,
         chosen_outcome: Symbol,
         stake_amount: i128,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         prediction::submit_prediction(&env, predictor, market_id, chosen_outcome, stake_amount)
     }
 
@@ -290,7 +290,7 @@ impl InsightArenaContract {
         env: Env,
         market_id: u64,
         predictor: Address,
-    ) -> Result<Prediction, InsightArenaError> {
+    ) -> Result<Prediction, PayaStakesError> {
         prediction::get_prediction(&env, market_id, predictor)
     }
 
@@ -314,7 +314,7 @@ impl InsightArenaContract {
         env: Env,
         predictor: Address,
         market_id: u64,
-    ) -> Result<i128, InsightArenaError> {
+    ) -> Result<i128, PayaStakesError> {
         prediction::claim_payout(&env, predictor, market_id)
     }
 
@@ -324,7 +324,7 @@ impl InsightArenaContract {
     }
 
     /// Audit the contract's escrow solvency.
-    pub fn assert_escrow_solvent(env: Env) -> Result<(), InsightArenaError> {
+    pub fn assert_escrow_solvent(env: Env) -> Result<(), PayaStakesError> {
         escrow::assert_escrow_solvent(&env)
     }
 
@@ -333,7 +333,7 @@ impl InsightArenaContract {
         env: Env,
         caller: Address,
         market_id: u64,
-    ) -> Result<u32, InsightArenaError> {
+    ) -> Result<u32, PayaStakesError> {
         prediction::batch_distribute_payouts(&env, caller, market_id)
     }
 
@@ -342,7 +342,7 @@ impl InsightArenaContract {
         proposer: Address,
         proposal_type: ProposalType,
         voting_duration: u64,
-    ) -> Result<u32, InsightArenaError> {
+    ) -> Result<u32, PayaStakesError> {
         governance::create_proposal(&env, proposer, proposal_type, voting_duration)
     }
 
@@ -351,7 +351,7 @@ impl InsightArenaContract {
         voter: Address,
         proposal_id: u32,
         vote_for: bool,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         governance::vote(&env, voter, proposal_id, vote_for)
     }
 
@@ -359,7 +359,7 @@ impl InsightArenaContract {
         env: Env,
         executor: Address,
         proposal_id: u32,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         governance::execute_proposal(&env, executor, proposal_id)
     }
 
@@ -370,7 +370,7 @@ impl InsightArenaContract {
     }
 
     /// Return a single governance proposal by ID.
-    pub fn get_proposal(env: Env, proposal_id: u32) -> Result<Proposal, InsightArenaError> {
+    pub fn get_proposal(env: Env, proposal_id: u32) -> Result<Proposal, PayaStakesError> {
         governance::get_proposal(&env, proposal_id)
     }
 
@@ -379,7 +379,7 @@ impl InsightArenaContract {
         env: Env,
         caller: Address,
         proposal_id: u32,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         governance::cancel_proposal(&env, caller, proposal_id)
     }
 
@@ -394,7 +394,7 @@ impl InsightArenaContract {
         admin: Address,
         to: Address,
         amount: i128,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         escrow::transfer_fee(&env, &admin, &to, amount)
     }
 
@@ -407,7 +407,7 @@ impl InsightArenaContract {
         market_id: u64,
         max_uses: u32,
         expires_in_seconds: u64,
-    ) -> Result<Symbol, InsightArenaError> {
+    ) -> Result<Symbol, PayaStakesError> {
         invite::generate_invite_code(env, creator, market_id, max_uses, expires_in_seconds)
     }
 
@@ -416,7 +416,7 @@ impl InsightArenaContract {
         env: Env,
         invitee: Address,
         code: Symbol,
-    ) -> Result<u64, InsightArenaError> {
+    ) -> Result<u64, PayaStakesError> {
         invite::redeem_invite_code(env, invitee, code)
     }
 
@@ -425,7 +425,7 @@ impl InsightArenaContract {
         env: Env,
         creator: Address,
         code: Symbol,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         invite::revoke_invite_code(env, creator, code)
     }
 
@@ -445,11 +445,11 @@ impl InsightArenaContract {
         start_time: u64,
         end_time: u64,
         reward_pool: i128,
-    ) -> Result<u32, InsightArenaError> {
+    ) -> Result<u32, PayaStakesError> {
         season::create_season(&env, admin, start_time, end_time, reward_pool)
     }
 
-    pub fn get_season(env: Env, season_id: u32) -> Result<Season, InsightArenaError> {
+    pub fn get_season(env: Env, season_id: u32) -> Result<Season, PayaStakesError> {
         season::get_season(&env, season_id)
     }
 
@@ -462,7 +462,7 @@ impl InsightArenaContract {
         admin: Address,
         season_id: u32,
         entries: Vec<LeaderboardEntry>,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         // Logic Check: Ensure contract is not paused
         config::ensure_not_paused(&env)?;
 
@@ -488,14 +488,14 @@ impl InsightArenaContract {
     pub fn get_leaderboard(
         env: Env,
         season_id: u32,
-    ) -> Result<LeaderboardSnapshot, InsightArenaError> {
+    ) -> Result<LeaderboardSnapshot, PayaStakesError> {
         season::get_leaderboard(&env, season_id)
     }
 
     pub fn get_season_participants(
         env: Env,
         season_id: u32,
-    ) -> Result<Vec<Address>, InsightArenaError> {
+    ) -> Result<Vec<Address>, PayaStakesError> {
         season::get_season_participants(&env, season_id)
     }
 
@@ -503,7 +503,7 @@ impl InsightArenaContract {
         env: Env,
         admin: Address,
         season_id: u32,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         season::finalize_season(&env, admin, season_id)
     }
 
@@ -511,7 +511,7 @@ impl InsightArenaContract {
         env: Env,
         admin: Address,
         new_season_id: u32,
-    ) -> Result<u32, InsightArenaError> {
+    ) -> Result<u32, PayaStakesError> {
         season::reset_season_points(&env, admin, new_season_id)
     }
 
@@ -527,7 +527,7 @@ impl InsightArenaContract {
     pub fn get_creator_stats(
         env: Env,
         creator: Address,
-    ) -> Result<CreatorStats, InsightArenaError> {
+    ) -> Result<CreatorStats, PayaStakesError> {
         reputation::get_creator_stats(env, creator)
     }
 
@@ -541,14 +541,14 @@ impl InsightArenaContract {
         env: Env,
         admin: Address,
         creator: Address,
-    ) -> Result<(), InsightArenaError> {
+    ) -> Result<(), PayaStakesError> {
         reputation::reset_creator_stats(&env, admin, creator)
     }
 
     // ── Analytics ─────────────────────────────────────────────────────────────
 
     /// Return aggregated stats for a single market.
-    pub fn get_market_stats(env: Env, market_id: u64) -> Result<MarketStats, InsightArenaError> {
+    pub fn get_market_stats(env: Env, market_id: u64) -> Result<MarketStats, PayaStakesError> {
         market::get_market_stats(env, market_id)
     }
 
@@ -556,12 +556,12 @@ impl InsightArenaContract {
     pub fn get_outcome_distribution(
         env: Env,
         market_id: u64,
-    ) -> Result<Vec<(Symbol, i128)>, InsightArenaError> {
+    ) -> Result<Vec<(Symbol, i128)>, PayaStakesError> {
         market::get_outcome_distribution(env, market_id)
     }
 
     /// Return the stored `UserProfile` for a given address.
-    pub fn get_user_stats(env: Env, user: Address) -> Result<UserProfile, InsightArenaError> {
+    pub fn get_user_stats(env: Env, user: Address) -> Result<UserProfile, PayaStakesError> {
         market::get_user_stats(env, user)
     }
 
@@ -578,7 +578,7 @@ impl InsightArenaContract {
         provider: Address,
         market_id: u64,
         amount: i128,
-    ) -> Result<i128, InsightArenaError> {
+    ) -> Result<i128, PayaStakesError> {
         liquidity::add_liquidity(&env, provider, market_id, amount)
     }
 
@@ -588,7 +588,7 @@ impl InsightArenaContract {
         provider: Address,
         market_id: u64,
         lp_tokens: i128,
-    ) -> Result<i128, InsightArenaError> {
+    ) -> Result<i128, PayaStakesError> {
         liquidity::remove_liquidity(&env, provider, market_id, lp_tokens)
     }
 
@@ -601,7 +601,7 @@ impl InsightArenaContract {
         to_outcome: Symbol,
         amount_in: i128,
         min_amount_out: i128,
-    ) -> Result<i128, InsightArenaError> {
+    ) -> Result<i128, PayaStakesError> {
         liquidity::swap_outcome(
             &env,
             trader,
@@ -618,7 +618,7 @@ impl InsightArenaContract {
         env: Env,
         market_id: u64,
         outcome: Symbol,
-    ) -> Result<i128, InsightArenaError> {
+    ) -> Result<i128, PayaStakesError> {
         liquidity::get_outcome_price(&env, market_id, outcome)
     }
 
@@ -627,7 +627,7 @@ impl InsightArenaContract {
         env: Env,
         provider: Address,
         market_id: u64,
-    ) -> Result<crate::storage_types::LPPosition, InsightArenaError> {
+    ) -> Result<crate::storage_types::LPPosition, PayaStakesError> {
         liquidity::get_lp_position_public(&env, provider, market_id)
     }
 
@@ -651,7 +651,7 @@ impl InsightArenaContract {
         env: Env,
         provider: Address,
         market_id: u64,
-    ) -> Result<i128, InsightArenaError> {
+    ) -> Result<i128, PayaStakesError> {
         liquidity::collect_lp_fees(&env, provider, market_id)
     }
 }

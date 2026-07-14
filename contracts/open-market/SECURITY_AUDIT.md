@@ -1,4 +1,4 @@
-# InsightArena Contract Security Audit Notes
+# PayaStakes Contract Security Audit Notes
 
 This file is a placeholder for the contract security audit reference mentioned in `CONTRIBUTING.md`.
 

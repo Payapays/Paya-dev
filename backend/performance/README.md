@@ -1,6 +1,6 @@
 # Performance Testing Suite
 
-This directory contains performance tests for the InsightArena backend API using k6.
+This directory contains performance tests for the PayaStakes backend API using k6.
 
 ## Setup
 

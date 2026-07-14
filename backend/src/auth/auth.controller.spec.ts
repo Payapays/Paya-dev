@@ -11,7 +11,7 @@ const mockAuthService = () => ({
   generateChallenge: jest
     .fn()
     .mockImplementation(
-      (address: string) => `InsightArena:nonce:1234567890:randomhex:${address}`,
+      (address: string) => `PayaStakes:nonce:1234567890:randomhex:${address}`,
     ),
   verifyChallenge: jest.fn(),
   verifyStellarSignature: jest.fn(),
@@ -49,7 +49,7 @@ describe('AuthController', () => {
     it('returns a challenge string for a valid stellar_address', () => {
       const result = controller.generateChallenge({ stellar_address: 'GABC' });
       expect(authService.generateChallenge).toHaveBeenCalledWith('GABC');
-      expect(result.challenge).toMatch(/^InsightArena:nonce:/);
+      expect(result.challenge).toMatch(/^PayaStakes:nonce:/);
     });
   });
 
@@ -115,7 +115,7 @@ describe('AuthController', () => {
     it('should return { verified: true } for a valid signature', () => {
       const dto = {
         stellar_address: 'G...Address',
-        challenge: 'InsightArena:dispute:123',
+        challenge: 'PayaStakes:dispute:123',
         signature: 'a1b2c3d4',
       };
       authService.verifyStellarSignature.mockReturnValue(true);
@@ -133,7 +133,7 @@ describe('AuthController', () => {
     it('should return { verified: false } for an invalid signature', () => {
       const dto = {
         stellar_address: 'G...Address',
-        challenge: 'InsightArena:dispute:123',
+        challenge: 'PayaStakes:dispute:123',
         signature: 'wrong-signature',
       };
       authService.verifyStellarSignature.mockReturnValue(false);

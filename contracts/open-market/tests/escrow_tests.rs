@@ -9,10 +9,10 @@
 //! - Solvency assertions (assert_escrow_solvent)
 //! - Edge case: zero losers scenario (all winners)
 
-use insightarena_contract::config;
-use insightarena_contract::escrow::*;
-use insightarena_contract::storage_types::{DataKey, Market, Prediction};
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::config;
+use payastakes_contract::escrow::*;
+use payastakes_contract::storage_types::{DataKey, Market, Prediction};
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 use soroban_sdk::testutils::Address as _;
 use soroban_sdk::token::{Client as TokenClient, StellarAssetClient};
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol, Vec};
@@ -27,9 +27,9 @@ fn register_token(env: &Env) -> Address {
 }
 
 /// Deploy and initialize the contract with the given xlm_token.
-fn deploy<'a>(env: &'a Env, xlm_token: &Address) -> InsightArenaContractClient<'a> {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy<'a>(env: &'a Env, xlm_token: &Address) -> PayaStakesContractClient<'a> {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     client.initialize(&admin, &oracle, &200_u32, xlm_token);
@@ -44,7 +44,7 @@ fn fund(env: &Env, xlm_token: &Address, recipient: &Address, amount: i128) {
 /// Seed an unresolved market into storage for solvency tests.
 /// This helper creates a market with the given market_id that is active
 /// and has not yet been resolved, suitable for testing escrow solvency checks.
-fn seed_unresolved_market(env: &Env, client: &InsightArenaContractClient<'_>, market_id: u64) {
+fn seed_unresolved_market(env: &Env, client: &PayaStakesContractClient<'_>, market_id: u64) {
     let market = Market::new(
         market_id,
         Address::generate(env),
@@ -106,7 +106,7 @@ fn test_lock_stake_zero_amount() {
     let predictor = Address::generate(&env);
 
     let result = env.as_contract(&client.address, || lock_stake(&env, &predictor, 0));
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 /// Test that lock_stake requires user authorization.
@@ -182,7 +182,7 @@ fn test_release_payout_contract_insolvent() {
     let result = env.as_contract(&client.address, || {
         release_payout(&env, &recipient, 10_000_000_i128)
     });
-    assert_eq!(result, Err(InsightArenaError::EscrowEmpty));
+    assert_eq!(result, Err(PayaStakesError::EscrowEmpty));
 }
 
 /// Test that release_payout rejects zero amount payouts.
@@ -196,7 +196,7 @@ fn test_release_payout_zero_value() {
     let recipient = Address::generate(&env);
 
     let result = env.as_contract(&client.address, || release_payout(&env, &recipient, 0));
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 // ── refund Tests ──────────────────────────────────────────────────────────────
@@ -236,7 +236,7 @@ fn test_refund_contract_insolvent() {
     let recipient = Address::generate(&env);
 
     let result = env.as_contract(&client.address, || refund(&env, &recipient, 10_000_000));
-    assert_eq!(result, Err(InsightArenaError::EscrowEmpty));
+    assert_eq!(result, Err(PayaStakesError::EscrowEmpty));
 }
 
 /// Test that refund rejects zero amount refunds.
@@ -250,7 +250,7 @@ fn test_refund_zero_value() {
     let recipient = Address::generate(&env);
 
     let result = env.as_contract(&client.address, || refund(&env, &recipient, 0));
-    assert_eq!(result, Err(InsightArenaError::InvalidInput));
+    assert_eq!(result, Err(PayaStakesError::InvalidInput));
 }
 
 // ── withdraw_treasury Tests ───────────────────────────────────────────────────
@@ -318,7 +318,7 @@ fn test_withdraw_treasury_overdraft() {
     let result = env.as_contract(&client.address, || {
         withdraw_treasury(env.clone(), admin.clone(), 5_000_000)
     });
-    assert_eq!(result, Err(InsightArenaError::InsufficientFunds));
+    assert_eq!(result, Err(PayaStakesError::InsufficientFunds));
 }
 
 /// Test that withdraw_treasury rejects unauthorized callers.
@@ -341,7 +341,7 @@ fn test_withdraw_treasury_unauthorized() {
     let result = env.as_contract(&client.address, || {
         withdraw_treasury(env.clone(), random_user.clone(), amount)
     });
-    assert_eq!(result, Err(InsightArenaError::Unauthorized));
+    assert_eq!(result, Err(PayaStakesError::Unauthorized));
 }
 
 // ── get_contract_balance Tests ────────────────────────────────────────────────
@@ -544,7 +544,7 @@ fn test_assert_escrow_solvent_when_balance_is_short() {
     fund(&env, &xlm_token, &client.address, 19_999_999);
 
     let result = env.as_contract(&client.address, || assert_escrow_solvent(&env));
-    assert_eq!(result, Err(InsightArenaError::EscrowEmpty));
+    assert_eq!(result, Err(PayaStakesError::EscrowEmpty));
 }
 
 /// Test that assert_escrow_solvent detects underfunding when contract balance < obligations.
@@ -618,7 +618,7 @@ fn test_assert_escrow_solvent_detects_underfunding() {
 
     // Verify solvency check detects underfunding
     let result_underfunded = env.as_contract(&client.address, || assert_escrow_solvent(&env));
-    assert_eq!(result_underfunded, Err(InsightArenaError::EscrowEmpty));
+    assert_eq!(result_underfunded, Err(PayaStakesError::EscrowEmpty));
 
     // Restore the balance
     fund(&env, &xlm_token, &client.address, withdrawal_amount);

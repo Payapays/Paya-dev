@@ -59,7 +59,7 @@ export class AuthService implements OnModuleInit {
   generateChallenge(stellar_address: string): string {
     const timestamp = Date.now();
     const random = randomBytes(16).toString('hex');
-    const challenge = `InsightArena:nonce:${timestamp}:${random}:${stellar_address}`;
+    const challenge = `PayaStakes:nonce:${timestamp}:${random}:${stellar_address}`;
 
     this.logger.debug(
       `Generating challenge for ${stellar_address}: ${challenge}`,

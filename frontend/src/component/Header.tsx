@@ -154,7 +154,7 @@ export default function Header() {
               href="/"
               className="text-xl font-bold text-white hover:text-[#4FD1C5]"
             >
-              InsightArena
+              PayaStakes
             </Link>
 
             {/* DESKTOP NAV */}

@@ -1,7 +1,7 @@
 use soroban_sdk::{contracttype, symbol_short, Address, Env, Symbol, Vec};
 
 use crate::config;
-use crate::errors::InsightArenaError;
+use crate::errors::PayaStakesError;
 use crate::market;
 use crate::storage_types::DataKey;
 use crate::Config;
@@ -51,11 +51,11 @@ fn store_categories(env: &Env, categories: &Vec<Symbol>) {
         .set(&DataKey::Categories, categories);
 }
 
-fn load_proposal(env: &Env, proposal_id: u32) -> Result<Proposal, InsightArenaError> {
+fn load_proposal(env: &Env, proposal_id: u32) -> Result<Proposal, PayaStakesError> {
     env.storage()
         .persistent()
         .get(&DataKey::Proposal(proposal_id))
-        .ok_or(InsightArenaError::InvalidInput)
+        .ok_or(PayaStakesError::InvalidInput)
 }
 
 fn store_proposal(env: &Env, proposal: &Proposal) {
@@ -93,12 +93,12 @@ pub fn create_proposal(
     proposer: Address,
     proposal_type: ProposalType,
     voting_duration: u64,
-) -> Result<u32, InsightArenaError> {
+) -> Result<u32, PayaStakesError> {
     config::ensure_not_paused(env)?;
     proposer.require_auth();
 
     if voting_duration == 0 {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let next_id = env
@@ -107,12 +107,12 @@ pub fn create_proposal(
         .get::<DataKey, u32>(&DataKey::ProposalCount)
         .unwrap_or(0)
         .checked_add(1)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let created_at = env.ledger().timestamp();
     let voting_end = created_at
         .checked_add(voting_duration)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let proposal = Proposal {
         proposal_id: next_id,
@@ -139,32 +139,32 @@ pub fn vote(
     voter: Address,
     proposal_id: u32,
     vote_for: bool,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     config::ensure_not_paused(env)?;
     voter.require_auth();
 
     let mut proposal = load_proposal(env, proposal_id)?;
     if proposal.executed || env.ledger().timestamp() > proposal.voting_end {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
 
 
     let vote_key = DataKey::ProposalVote(proposal_id, voter.clone());
     if env.storage().persistent().has(&vote_key) {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     if vote_for {
         proposal.votes_for = proposal
             .votes_for
             .checked_add(1)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
     } else {
         proposal.votes_against = proposal
             .votes_against
             .checked_add(1)
-            .ok_or(InsightArenaError::Overflow)?;
+            .ok_or(PayaStakesError::Overflow)?;
     }
 
     env.storage().persistent().set(&vote_key, &true);
@@ -176,13 +176,13 @@ pub fn execute_proposal(
     env: &Env,
     executor: Address,
     proposal_id: u32,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     config::ensure_not_paused(env)?;
     executor.require_auth();
 
     let mut proposal = load_proposal(env, proposal_id)?;
     if proposal.executed || env.ledger().timestamp() < proposal.voting_end {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
     let users = load_registered_users(env);
@@ -190,11 +190,11 @@ pub fn execute_proposal(
     let total_votes = proposal
         .votes_for
         .checked_add(proposal.votes_against)
-        .ok_or(InsightArenaError::Overflow)?;
+        .ok_or(PayaStakesError::Overflow)?;
 
     let quorum = proposal_quorum(total_users);
     if total_votes < quorum || proposal.votes_for <= proposal.votes_against {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     let summary = match proposal.proposal_type.clone() {
@@ -208,13 +208,13 @@ pub fn execute_proposal(
         }
         ProposalType::UpdateMinStake(amount) => {
             if amount <= 0 {
-                return Err(InsightArenaError::InvalidInput);
+                return Err(PayaStakesError::InvalidInput);
             }
             let mut cfg: Config = env
                 .storage()
                 .persistent()
                 .get(&DataKey::Config)
-                .ok_or(InsightArenaError::NotInitialized)?;
+                .ok_or(PayaStakesError::NotInitialized)?;
             cfg.min_stake_xlm = amount;
             env.storage().persistent().set(&DataKey::Config, &cfg);
             symbol_short!("minstk")
@@ -243,19 +243,19 @@ pub fn cancel_proposal(
     env: &Env,
     caller: Address,
     proposal_id: u32,
-) -> Result<(), InsightArenaError> {
+) -> Result<(), PayaStakesError> {
     caller.require_auth();
 
     let mut proposal = load_proposal(env, proposal_id)?;
 
     if proposal.executed || proposal.cancelled {
-        return Err(InsightArenaError::InvalidInput);
+        return Err(PayaStakesError::InvalidInput);
     }
 
 
     let cfg = config::get_config(env)?;
     if caller != proposal.proposer && caller != cfg.admin {
-        return Err(InsightArenaError::Unauthorized);
+        return Err(PayaStakesError::Unauthorized);
     }
 
     proposal.cancelled = true;
@@ -268,7 +268,7 @@ pub fn cancel_proposal(
 }
 
 /// Return a single proposal by ID, extending its TTL on read.
-pub fn get_proposal(env: &Env, proposal_id: u32) -> Result<Proposal, InsightArenaError> {
+pub fn get_proposal(env: &Env, proposal_id: u32) -> Result<Proposal, PayaStakesError> {
     let proposal = load_proposal(env, proposal_id)?;
     env.storage().persistent().extend_ttl(
         &DataKey::Proposal(proposal_id),

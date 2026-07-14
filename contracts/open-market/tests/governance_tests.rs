@@ -1,6 +1,6 @@
-use insightarena_contract::governance::ProposalType;
+use payastakes_contract::governance::ProposalType;
 
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient, InsightArenaError};
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient, PayaStakesError};
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::{Address, Env, Symbol, Vec};
 
@@ -12,9 +12,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address) {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> (PayaStakesContractClient<'_>, Address) {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     let xlm_token = register_token(env);
@@ -23,7 +23,7 @@ fn deploy(env: &Env) -> (InsightArenaContractClient<'_>, Address) {
     (client, admin)
 }
 
-fn seed_users(env: &Env, _client: &InsightArenaContractClient, count: u32) -> Vec<Address> {
+fn seed_users(env: &Env, _client: &PayaStakesContractClient, count: u32) -> Vec<Address> {
     let mut users = Vec::new(env);
     for _ in 0..count {
         let user = Address::generate(env);
@@ -34,7 +34,7 @@ fn seed_users(env: &Env, _client: &InsightArenaContractClient, count: u32) -> Ve
 
 fn pass_proposal(
     env: &Env,
-    client: &InsightArenaContractClient,
+    client: &PayaStakesContractClient,
     action: &ProposalType,
     voters: &Vec<Address>,
 ) -> u32 {
@@ -222,5 +222,5 @@ fn test_cancel_proposal_by_non_proposer_fails() {
     let id = client.create_proposal(&proposer, &ProposalType::UpdateProtocolFee(400), &duration);
 
     let result = client.try_cancel_proposal(&non_proposer, &id);
-    assert!(matches!(result, Err(Ok(InsightArenaError::Unauthorized))));
+    assert!(matches!(result, Err(Ok(PayaStakesError::Unauthorized))));
 }

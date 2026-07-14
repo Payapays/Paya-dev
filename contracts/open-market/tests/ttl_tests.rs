@@ -1,6 +1,6 @@
-use insightarena_contract::config::{LEDGER_BUMP_MARKET, LEDGER_BUMP_PREDICTION_CLAIMED};
-use insightarena_contract::storage_types::DataKey;
-use insightarena_contract::{InsightArenaContract, InsightArenaContractClient};
+use payastakes_contract::config::{LEDGER_BUMP_MARKET, LEDGER_BUMP_PREDICTION_CLAIMED};
+use payastakes_contract::storage_types::DataKey;
+use payastakes_contract::{PayaStakesContract, PayaStakesContractClient};
 use soroban_sdk::testutils::{
     storage::{Persistent as _, Temporary as _},
     Address as _, Ledger as _,
@@ -8,7 +8,7 @@ use soroban_sdk::testutils::{
 use soroban_sdk::token::StellarAssetClient;
 use soroban_sdk::{symbol_short, vec, Address, Env, String, Symbol};
 
-use insightarena_contract::market::CreateMarketParams;
+use payastakes_contract::market::CreateMarketParams;
 
 fn register_token(env: &Env) -> Address {
     let token_admin = Address::generate(env);
@@ -16,9 +16,9 @@ fn register_token(env: &Env) -> Address {
         .address()
 }
 
-fn deploy(env: &Env) -> InsightArenaContractClient<'_> {
-    let id = env.register(InsightArenaContract, ());
-    let client = InsightArenaContractClient::new(env, &id);
+fn deploy(env: &Env) -> PayaStakesContractClient<'_> {
+    let id = env.register(PayaStakesContract, ());
+    let client = PayaStakesContractClient::new(env, &id);
     let admin = Address::generate(env);
     let oracle = Address::generate(env);
     env.mock_all_auths();
