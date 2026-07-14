@@ -4,4 +4,4 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 
-Sitemap: https://insightarena.com/sitemap.xml
+Sitemap: https://payastakes.com/sitemap.xml

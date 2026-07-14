@@ -57,11 +57,11 @@ log_pass "Test wallets funded"
 
 log_step "Step 2: Build Contract"
 
-if [ ! -f "target/wasm32-unknown-unknown/release/insightarena_contract.wasm" ]; then
+if [ ! -f "target/wasm32-unknown-unknown/release/payastakes_contract.wasm" ]; then
     cargo build --release --target wasm32-unknown-unknown 2>&1 | tail -5 || log_fail "Contract build failed"
 fi
 
-WASM_PATH="target/wasm32-unknown-unknown/release/insightarena_contract.wasm"
+WASM_PATH="target/wasm32-unknown-unknown/release/payastakes_contract.wasm"
 [ -f "$WASM_PATH" ] || log_fail "WASM file not found at $WASM_PATH"
 
 log_pass "Contract built successfully"
