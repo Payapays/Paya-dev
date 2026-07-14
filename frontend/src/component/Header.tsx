@@ -201,34 +201,39 @@ export default function Header() {
                 ☰
               </button>
 
-              {/* Profile link — desktop only, sits beside wallet button */}
-              <Link
-                href="/profile"
-                aria-current={isActive("/profile") ? "page" : undefined}
-                className={`relative hidden md:inline-flex transition-colors ${
-                  isActive("/profile")
-                    ? "text-white font-semibold"
-                    : "text-gray-200 hover:text-white"
-                }`}
-              >
-                Profile
-                <span
-                  className={`absolute left-0 right-0 -bottom-1 h-0.5 bg-orange-500 transition-opacity ${
-                    isActive("/profile") ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-              </Link>
-              {/* Notification Bell */}
-              <Link
-                href="/notifications"
-                className="relative hidden md:inline-flex items-center text-gray-200 hover:text-white"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
-                </span>
-              </Link>
+              {/* Profile + Notifications — only shown when signed in
+                  so unauthenticated visitors don't click into a login wall. */}
+              {isAuthenticated && (
+                <>
+                  <Link
+                    href="/profile"
+                    aria-current={isActive("/profile") ? "page" : undefined}
+                    className={`relative hidden md:inline-flex transition-colors ${
+                      isActive("/profile")
+                        ? "text-white font-semibold"
+                        : "text-gray-200 hover:text-white"
+                    }`}
+                  >
+                    Profile
+                    <span
+                      className={`absolute left-0 right-0 -bottom-1 h-0.5 bg-orange-500 transition-opacity ${
+                        isActive("/profile") ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  </Link>
+                  <Link
+                    href="/notifications"
+                    aria-label="Notifications"
+                    className="relative hidden md:inline-flex items-center text-gray-200 hover:text-white"
+                  >
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                    </span>
+                  </Link>
+                </>
+              )}
 
               {!isAuthenticated ? (
                 <button
@@ -368,18 +373,30 @@ export default function Header() {
           })}
 
           <div className="mt-4 border-t border-white/10 pt-4">
-            <Link
-              href="/profile"
-              aria-current={isActive("/profile") ? "page" : undefined}
-              className={`mb-3 block rounded-md px-2 py-2 text-lg ${
-                isActive("/profile")
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-200 hover:bg-zinc-900"
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Profile
-            </Link>
+            {isAuthenticated && (
+              <div className="mb-3 flex flex-col gap-1">
+                {[
+                  { name: "Dashboard", link: "/dashboard" },
+                  { name: "Profile", link: "/profile" },
+                  { name: "Wallet", link: "/wallet" },
+                  { name: "Notifications", link: "/notifications" },
+                ].map((item) => (
+                  <Link
+                    key={item.link}
+                    href={item.link}
+                    aria-current={isActive(item.link) ? "page" : undefined}
+                    className={`block rounded-md px-2 py-2 text-lg ${
+                      isActive(item.link)
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-200 hover:bg-zinc-900"
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            )}
             {!isAuthenticated ? (
               <button
                 type="button"
