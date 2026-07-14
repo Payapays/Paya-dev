@@ -110,9 +110,36 @@ function Hero() {
           <Dot />
           <span>Two-source oracle</span>
           <Dot />
-          <span>Multi-asset (XLM · USDC · EURC)</span>
-          <Dot />
           <span>Soroban settled</span>
+          <Dot />
+          <span>Open-source · MIT</span>
+        </div>
+
+        {/* supported assets */}
+        <div className="mx-auto mt-10 flex max-w-md items-center justify-center gap-3">
+          <div className="h-px flex-1" style={{ background: BORDER }} />
+          <span className="text-[10px] uppercase tracking-widest" style={{ color: TEXT_DIM }}>
+            Stake in
+          </span>
+          <div className="h-px flex-1" style={{ background: BORDER }} />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          {[
+            { symbol: "XLM", name: "Stellar Lumens" },
+            { symbol: "USDC", name: "USD Coin" },
+            { symbol: "EURC", name: "Euro Coin" },
+            { symbol: "+ any", name: "Issued Stellar asset" },
+          ].map((a) => (
+            <span
+              key={a.symbol}
+              title={a.name}
+              className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs"
+              style={{ background: SURFACE, borderColor: BORDER, color: TEXT_MUTED }}
+            >
+              <span aria-hidden style={{ color: ACCENT }}>◆</span>
+              <span className="font-mono font-semibold" style={{ color: TEXT }}>{a.symbol}</span>
+            </span>
+          ))}
         </div>
       </div>
     </section>
