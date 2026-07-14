@@ -19,3 +19,4 @@ build/
 issue.md
 CLAUDE.md
 .playwright-mcp
+lint_report.json
