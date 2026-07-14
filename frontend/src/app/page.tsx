@@ -333,6 +333,309 @@ function HowItWorks() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Three-tier stack
+// ─────────────────────────────────────────────────────────────────────────────
+const TIERS = [
+  {
+    tier: "Product",
+    dir: "frontend/",
+    tagline: "What users see",
+    body: "Prediction markets, private leagues, wagers, and tournaments. Users sign every transaction with their own Stellar wallet — the app never holds funds.",
+    stack: ["Next.js 16", "React 19", "Tailwind CSS 4", "Stellar Wallets Kit"],
+  },
+  {
+    tier: "Infrastructure",
+    dir: "backend/",
+    tagline: "What orchestrates",
+    body: "Oracle aggregation, on-chain indexing, scheduled payouts, notifications, analytics, APIs. A facilitator — never a custodian.",
+    stack: ["NestJS 11", "PostgreSQL 14+", "TypeORM", "Socket.IO"],
+  },
+  {
+    tier: "Protocol",
+    dir: "contracts/",
+    tagline: "The trust root",
+    body: "Soroban smart contracts that hold every stake and settle every outcome. Deterministic, auditable, and open-source under MIT.",
+    stack: ["Soroban", "Rust", "Stellar Network", "WASM"],
+  },
+];
+
+function ThreeTierStack() {
+  return (
+    <section className="relative border-t py-24" style={{ borderColor: BORDER, background: SURFACE }}>
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-2xl">
+          <div className="text-xs uppercase tracking-widest" style={{ color: ACCENT }}>
+            The architecture
+          </div>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: TEXT }}>
+            One stack, three tiers, zero custody.
+          </h2>
+          <p className="mt-3" style={{ color: TEXT_MUTED }}>
+            PayaStakes is deliberately layered. The trust root lives in open-source
+            Soroban contracts on Stellar. Everything above them — the API, the app —
+            is a facilitator that can never move your funds unilaterally.
+          </p>
+        </div>
+
+        <div className="mt-12 space-y-3">
+          {TIERS.map((t, i) => (
+            <div
+              key={t.tier}
+              className="grid gap-4 rounded-xl border p-6 md:grid-cols-[180px_1fr_auto] md:items-center"
+              style={{ background: SURFACE_HIGH, borderColor: BORDER }}
+            >
+              <div>
+                <div
+                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                  style={{ background: ACCENT_SOFT, color: ACCENT }}
+                >
+                  Tier {i + 1}
+                </div>
+                <div className="mt-2 text-xl font-bold" style={{ color: TEXT }}>
+                  {t.tier}
+                </div>
+                <div className="mt-0.5 font-mono text-xs" style={{ color: TEXT_DIM }}>
+                  {t.dir}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] uppercase tracking-widest" style={{ color: TEXT_DIM }}>
+                  {t.tagline}
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed" style={{ color: TEXT_MUTED }}>
+                  {t.body}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 md:justify-end">
+                {t.stack.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-md border px-2 py-1 text-[10px] font-medium"
+                    style={{ borderColor: BORDER, color: TEXT_MUTED, background: SURFACE }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 rounded-xl border p-4 text-xs" style={{ background: BG, borderColor: BORDER, color: TEXT_DIM }}>
+          <span aria-hidden style={{ color: ACCENT }}>◆</span>{" "}
+          <span style={{ color: TEXT }}>Non-custodial guarantee:</span> the
+          infrastructure and product tiers can request settlement, but only the
+          protocol tier can move funds — and only when oracle attestations satisfy
+          the on-chain conditions.
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI features
+// ─────────────────────────────────────────────────────────────────────────────
+const AI_FEATURES = [
+  {
+    icon: "◆",
+    title: "AI benchmark competitor",
+    body: "The platform's own model enters every prediction market as a ranked user. Every human participant gets a live baseline to beat — not just other humans.",
+    metric: "Rank vs AI",
+  },
+  {
+    icon: "◇",
+    title: "Personalised Leaderboard Coach",
+    body: "The AI analyses each user's prediction history and delivers tailored weekly insights on how to improve — what categories they're strong in, where they systematically over- or under-price.",
+    metric: "Weekly briefs",
+  },
+  {
+    icon: "▲",
+    title: "AI-assisted market creation",
+    body: "When creators build custom prediction events, the AI recommends optimal match selections, deadlines, and competition structures to maximise engagement.",
+    metric: "Smart defaults",
+  },
+];
+
+function AISection() {
+  return (
+    <section className="relative py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="max-w-2xl">
+          <div className="text-xs uppercase tracking-widest" style={{ color: ACCENT }}>
+            Intelligence layer
+          </div>
+          <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: TEXT }}>
+            Beat the machine. Learn from your history.
+          </h2>
+          <p className="mt-3" style={{ color: TEXT_MUTED }}>
+            Every user shares the leaderboard with an AI model that predicts every
+            market the platform lists. Rank above it and you're objectively better
+            than a state-of-the-art model at that outcome.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {AI_FEATURES.map((f) => (
+            <div
+              key={f.title}
+              className="relative overflow-hidden rounded-xl border p-6"
+              style={{ background: SURFACE, borderColor: BORDER }}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  aria-hidden
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-lg"
+                  style={{ background: ACCENT_SOFT, color: ACCENT }}
+                >
+                  {f.icon}
+                </span>
+                <span className="text-[10px] uppercase tracking-widest" style={{ color: TEXT_DIM }}>
+                  {f.metric}
+                </span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold" style={{ color: TEXT }}>{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: TEXT_MUTED }}>{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// For developers / open source
+// ─────────────────────────────────────────────────────────────────────────────
+function ForDevelopers() {
+  return (
+    <section className="relative border-t py-24" style={{ borderColor: BORDER, background: BG }}>
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="grid gap-10 md:grid-cols-2 md:gap-16">
+          <div>
+            <div className="text-xs uppercase tracking-widest" style={{ color: ACCENT }}>
+              For developers
+            </div>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: TEXT }}>
+              A protocol, not just an app.
+            </h2>
+            <p className="mt-4 leading-relaxed" style={{ color: TEXT_MUTED }}>
+              The Soroban contracts that power PayaStakes are open source under
+              MIT. Fork them, build a competing frontend, plug the escrow into
+              your own product, or contribute upstream. The stakes primitive
+              belongs to the Stellar ecosystem.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <DevBullet
+                label="Open contracts"
+                body="open-market and creator-event-manager, in contracts/ — MIT-licensed Rust with unit tests, integration tests, and an audit checklist."
+              />
+              <DevBullet
+                label="Public API"
+                body="NestJS backend exposes a Swagger-documented REST + WebSocket API at /api/v1/docs. Wire your own product on top."
+              />
+              <DevBullet
+                label="Wallet-agnostic"
+                body="Frontend integrates via Stellar Wallets Kit — Freighter, xBull, Rabet, LOBSTR all supported out of the box."
+              />
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="https://github.com/Payapays/Paya-dev"
+                className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-transform hover:-translate-y-0.5"
+                style={{ background: ACCENT, color: "#0a0a10" }}
+              >
+                View on GitHub →
+              </Link>
+              <Link
+                href="/docs"
+                className="inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold"
+                style={{ borderColor: BORDER, color: TEXT, background: SURFACE }}
+              >
+                Read the docs
+              </Link>
+            </div>
+          </div>
+
+          {/* Code snippet card */}
+          <div
+            className="overflow-hidden rounded-xl border"
+            style={{ background: SURFACE, borderColor: BORDER }}
+          >
+            <div
+              className="flex items-center justify-between border-b px-4 py-2.5 font-mono text-xs"
+              style={{ borderColor: BORDER, color: TEXT_DIM }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span style={{ width: 10, height: 10, background: "#ff6b6b", borderRadius: 999 }} />
+                <span style={{ width: 10, height: 10, background: AMBER, borderRadius: 999 }} />
+                <span style={{ width: 10, height: 10, background: ACCENT, borderRadius: 999 }} />
+              </div>
+              <span>contracts/open-market/src/lib.rs</span>
+            </div>
+            <pre className="overflow-x-auto p-5 font-mono text-[12.5px] leading-relaxed" style={{ color: TEXT_MUTED }}>
+              <code>
+{`#[contractimpl]
+impl OpenMarket {
+    // Anyone can stake — funds locked in-contract.
+    pub fn stake(
+        env: Env,
+        market_id: u64,
+        side: Outcome,
+        asset: Address,
+        amount: i128,
+    ) -> Result<StakeReceipt, Error> {
+        let staker = env.current_contract_address();
+        `}<span style={{ color: ACCENT }}>{`require_auth`}</span>{`(&staker);
+        `}<span style={{ color: ACCENT }}>{`assert_market_open`}</span>{`(&env, market_id)?;
+        `}<span style={{ color: ACCENT }}>{`escrow_transfer`}</span>{`(&env, asset, amount)?;
+        Ok(record_stake(&env, market_id, side, amount))
+    }
+
+    // Two oracles must agree before settlement can trigger.
+    pub fn settle(
+        env: Env,
+        market_id: u64,
+        attestations: Vec<OracleAttestation>,
+    ) -> Result<(), Error> {
+        `}<span style={{ color: ACCENT }}>{`require_two_source_agreement`}</span>{`(&attestations)?;
+        payout_winners(&env, market_id)
+    }
+}`}
+              </code>
+            </pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DevBullet({ label, body }: { label: string; body: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span
+        aria-hidden
+        className="mt-1 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+        style={{ background: ACCENT_SOFT, color: ACCENT }}
+      >
+        <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M2 6l2.5 2.5L10 3" />
+        </svg>
+      </span>
+      <div className="text-sm leading-relaxed">
+        <span className="font-semibold" style={{ color: TEXT }}>{label}.</span>{" "}
+        <span style={{ color: TEXT_MUTED }}>{body}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Why Stellar
 // ─────────────────────────────────────────────────────────────────────────────
 const STELLAR_POINTS = [
@@ -634,9 +937,12 @@ export default function Home() {
         <StatBar />
         <FeaturedMarkets />
         <HowItWorks />
+        <ThreeTierStack />
         <ProductSurfaces />
+        <AISection />
         <WhyStellar />
         <TrustPanel />
+        <ForDevelopers />
         <Roadmap />
         <CTABand />
       </main>
