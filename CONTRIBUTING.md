@@ -6,14 +6,28 @@ Thanks for your interest in contributing. This guide covers everything you need 
 
 ## Table of Contents
 
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Backend Setup](#backend-setup)
-- [Contract Setup](#contract-setup)
-- [Running CI Locally](#running-ci-locally)
-- [GitHub Actions Workflows](#github-actions-workflows)
-- [Pull Request Checklist](#pull-request-checklist)
-- [Troubleshooting](#troubleshooting)
+- [Contributing to PayaStakes](#contributing-to-payastakes)
+  - [Table of Contents](#table-of-contents)
+  - [Project Structure](#project-structure)
+  - [Prerequisites](#prerequisites)
+    - [Backend](#backend)
+    - [Contracts](#contracts)
+  - [Backend Setup](#backend-setup)
+  - [Contracts Setup](#contracts-setup)
+  - [Running CI Locally](#running-ci-locally)
+    - [Backend](#backend-1)
+    - [Contracts](#contracts-1)
+  - [GitHub Actions Workflows](#github-actions-workflows)
+    - [`backend-ci.yml`](#backend-ciyml)
+    - [`contract-ci.yml`](#contract-ciyml)
+  - [Pull Request Checklist](#pull-request-checklist)
+  - [Troubleshooting](#troubleshooting)
+    - [Backend: lint fails](#backend-lint-fails)
+    - [Backend: tests fail](#backend-tests-fail)
+    - [Backend: build fails](#backend-build-fails)
+    - [Contract: cargo test fails](#contract-cargo-test-fails)
+    - [Contract: WASM build fails](#contract-wasm-build-fails)
+    - [pnpm frozen lockfile error](#pnpm-frozen-lockfile-error)
 
 ---
 
@@ -221,7 +235,3 @@ Then commit the updated `pnpm-lock.yaml`.
 
 ---
 
-## Community
-
-Join the Telegram to ask questions or discuss contributions:  
-👉 https://t.me/+hR9dZKau8f84YTk0
