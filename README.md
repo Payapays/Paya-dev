@@ -1,14 +1,18 @@
 # PayaStakes
 
-**A Stellar-native stakes, escrow, and payouts platform.**
+**A Stellar-native prediction market platform, built on a general-purpose stakes and payouts protocol.**
 
-PayaStakes is a full-stack platform for putting real money on the line — safely, globally, and cheaply — powered by the [Stellar network](https://stellar.org/) and [Soroban](https://stellar.org/soroban) smart contracts. It combines three layers into one product:
+PayaStakes is a full-stack platform for putting real money on the line — safely, globally, and cheaply — powered by the [Stellar network](https://stellar.org/) and [Soroban](https://stellar.org/soroban) smart contracts.
+
+Prediction markets are our flagship product: sports, crypto prices, and any measurable real-world outcome, with two-source oracle validation, an AI benchmark competitor, autonomous fixture sync, and private leagues with invite codes. But because we built prediction markets on top of a general stakes-and-escrow protocol, the same infrastructure also powers friend-vs-friend wagers, community pools, tournaments, and third-party integrations.
+
+Three layers, one product:
 
 1. **Protocol layer** — a peer-to-peer stakes primitive. Any two (or more) parties can lock any Stellar asset against any outcome, and Soroban settles the winner deterministically.
 2. **Infrastructure layer** — programmable escrow and payout rails. Trustless custody, multi-asset support, scheduled and streaming disbursements, and oracle-verified resolution — all as reusable building blocks.
-3. **Product layer** — cross-border stakes and tournaments for real users. Private leagues, friend-vs-friend wagers, community pools, and public competitions with instant Stellar settlement in the currency each participant already holds.
+3. **Product layer** — prediction markets first, plus cross-border stakes and tournaments. Private leagues, friend-vs-friend wagers, community pools, and public competitions with instant Stellar settlement in the currency each participant already holds.
 
-The result is a system where a solo user can bet a friend $5 on Sunday's game, a community can run a 10,000-person prediction league, and a business can plug a trustless escrow into its own app — all on the same infrastructure, all settling on Stellar in seconds for fractions of a cent.
+The result is a system where a solo user can predict Sunday's game against a friend for $5, a community can run a 10,000-person prediction league, and a business can plug the same trustless escrow into its own app — all on one stack, all settling on Stellar in seconds for fractions of a cent.
 
 ---
 
@@ -26,6 +30,22 @@ Stellar is purpose-built for what PayaStakes needs. Every design choice below le
 | Streaming and scheduled disbursements   | Native `ClaimableBalance` + Soroban time-locked contracts           |
 
 Nothing here is retrofitted onto a general-purpose L1. PayaStakes is designed *around* Stellar's payment-first model rather than in spite of it.
+
+---
+
+## Flagship: Prediction Markets
+
+The first and most fully-featured product on the PayaStakes stack. Users submit predictions on real-world outcomes — sports results, crypto prices, milestones, anything measurable — and settle in seconds on Stellar.
+
+- **Public markets** — global prediction events on live sports fixtures, prices, and news. New markets are created automatically by an autonomous fixture sync that pulls schedules hourly, so the platform never runs out of things to predict.
+- **Private prediction leagues** — any user can spin up a closed league, generate an invite code, and share it with friends or a community. Participants earn points on prediction accuracy and compete on a private leaderboard.
+- **Two-source oracle validation** — every outcome is cross-checked across two independent providers before a Soroban contract will accept it and trigger settlement. No single point of failure, no operator override.
+- **AI benchmark competitor** — the platform's own model enters every market as a ranked user, giving every human participant a live baseline to beat.
+- **Personalised Leaderboard Coach** — the AI analyses each user's prediction history and delivers tailored weekly insights on how to improve.
+- **AI-assisted market creation** — when creators build custom prediction events, the AI recommends the best match selections, optimal deadlines, and competition structures to maximise engagement.
+- **Trustless settlement** — all escrow, resolution, and payouts run through Soroban contracts with sub-second finality and near-zero fees. The platform never holds user funds.
+
+Prediction markets ride entirely on the same protocol and infrastructure that power everything else on this stack, which is why the same features (multi-asset stakes, cross-border payouts, private invites, streaming disbursements) work seamlessly for tournaments and P2P wagers too.
 
 ---
 
@@ -150,14 +170,15 @@ The consumer app never custodies funds. Users sign with their own Stellar wallet
 - **Instant cross-border settlement** — payouts land in the recipient's Stellar wallet in seconds, convertible via anchors to local currency in 180+ countries.
 - **Oracle attester contracts** — reusable Soroban modules for wiring any external data source into on-chain resolution.
 
-### Product layer — tournaments and consumer stakes
+### Product layer — prediction markets and consumer stakes
 
-- **Private leagues with invite codes** — closed communities can host their own leaderboards with unique invite links.
+- **Prediction markets (flagship)** — public and private markets on sports, crypto prices, and any measurable outcome, with two-source oracle validation and AI-assisted market creation. See [Flagship: Prediction Markets](#flagship-prediction-markets) above for the full feature set.
+- **Private leagues with invite codes** — closed communities host their own prediction leaderboards and tournaments with unique invite links.
 - **Public tournaments** — global competitions with auto-created markets that never go stale (autonomous fixture sync).
-- **AI-assisted event creation** — recommended matches, deadlines, and structures to maximise participation.
-- **Personalised Leaderboard Coach** — AI analyses each user's history and delivers weekly insights on how to improve.
-- **AI benchmark competitor** — the platform's own model enters every market as a ranked user, giving humans a live baseline to beat.
-- **Predictions as a first-class use case** — the original prediction-market experience is now one product on the PayaStakes stack, not the whole platform.
+- **Friend-vs-friend wagers** — the same protocol that powers markets also powers 1:1 P2P stakes between friends, in any Stellar asset.
+- **Community pools** — group stakes where a whole community contributes to a shared prize pool and winners are resolved by oracle-verified outcomes.
+- **AI benchmark competitor** — the platform's own model enters every prediction market as a ranked user, giving humans a live baseline to beat.
+- **Personalised Leaderboard Coach** — AI analyses each user's prediction history and delivers weekly insights on how to improve.
 
 ---
 
@@ -188,6 +209,6 @@ The consumer app never custodies funds. Users sign with their own Stellar wallet
 
 ## Vision
 
-Stellar was built to move value across borders quickly and cheaply. PayaStakes uses that primitive for the moments where value moves *conditionally* — when the outcome of a game, a milestone, a tournament, or a private wager decides who receives what.
+Stellar was built to move value across borders quickly and cheaply. PayaStakes uses that primitive for the moments where value moves *conditionally* — when the outcome of a match, a price, a milestone, or a private wager decides who receives what.
 
-By combining a peer-to-peer stakes protocol, programmable escrow infrastructure, and a consumer tournament product on a single Stellar-native stack, PayaStakes turns "put your money where your mouth is" into something anyone in the world can do — trustlessly, instantly, and in the currency they already hold.
+Prediction markets are how most users will first meet PayaStakes: predict Sunday's game, join a private league, back your read on a crypto price. But under the hood it's a peer-to-peer stakes protocol, programmable escrow infrastructure, and a consumer product line — all on a single Stellar-native stack. Same rails, more ways to prove insight and put money on the line.
