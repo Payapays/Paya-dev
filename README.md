@@ -1,6 +1,6 @@
 
 
-PayaStakes turns Stellar's payments infrastructure into a general-purpose settlement layer for outcomes. Any user — anywhere in the world, holding any Stellar asset — can put money on a prediction, a private wager, or a tournament and have it settled trustlessly by Soroban smart contracts in seconds, for fractions of a cent.
+PayaStakes turns Stellar's payments infrastructure into a general purpose settlement layer for outcomes. Any user — anywhere in the world, holding any Stellar asset  can put money on a prediction, a private wager, or a tournament and have it settled trustlessly by Soroban smart contracts in seconds, for fractions of a cent.
 
 Prediction markets are our flagship product. On top of the same protocol we also power friend-to-friend wagers, community pools, and public tournaments — because the underlying primitive (conditional escrow of any Stellar asset, resolved by oracle attestations) is the same for all of them.
 
